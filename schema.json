@@ -1,0 +1,143 @@
+{
+    "database": "hr_valais_prototype",
+    "tables": [
+        {
+            "name": "firms",
+            "columns": [
+                {
+                    "name": "firm_id",
+                    "type": "UUID",
+                    "primary_key": true
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR"
+                },
+                {
+                    "name": "industry_domain",
+                    "type": "VARCHAR"
+                }
+            ]
+        },
+        {
+            "name": "users",
+            "columns": [
+                {
+                    "name": "user_id",
+                    "type": "UUID",
+                    "primary_key": true
+                },
+                {
+                    "name": "firm_id",
+                    "type": "UUID",
+                    "foreign_key": "firms.firm_id",
+                    "nullable": true
+                },
+                {
+                    "name": "role",
+                    "type": "VARCHAR",
+                    "description": "Enum: 'employee', 'hr_manager', 'admin'"
+                },
+                {
+                    "name": "hashed_password",
+                    "type": "VARCHAR"
+                }
+            ]
+        },
+        {
+            "name": "survey_responses",
+            "description": "Stores the 1-5 Likert scale answers for the 21 HR Valais pillars.",
+            "columns": [
+                {
+                    "name": "response_id",
+                    "type": "UUID",
+                    "primary_key": true
+                },
+                {
+                    "name": "user_id",
+                    "type": "UUID",
+                    "foreign_key": "users.user_id"
+                },
+                {
+                    "name": "firm_id",
+                    "type": "UUID",
+                    "foreign_key": "firms.firm_id"
+                },
+                {
+                    "name": "timestamp",
+                    "type": "TIMESTAMP"
+                },
+                {
+                    "name": "recrutement_q1_to_q3",
+                    "type": "INT[]",
+                    "description": "Array of 3 integers"
+                },
+                {
+                    "name": "competences_q4_to_q6",
+                    "type": "INT[]"
+                },
+                {
+                    "name": "performance_q7_to_q9",
+                    "type": "INT[]"
+                },
+                {
+                    "name": "remuneration_q10_to_q12",
+                    "type": "INT[]"
+                },
+                {
+                    "name": "qvt_q13_to_q15",
+                    "type": "INT[]"
+                },
+                {
+                    "name": "droit_q16_to_q18",
+                    "type": "INT[]"
+                },
+                {
+                    "name": "transverse_q19_to_q21",
+                    "type": "INT[]"
+                },
+                {
+                    "name": "free_text_feedback",
+                    "type": "TEXT"
+                }
+            ]
+        },
+        {
+            "name": "ofs_macro_data",
+            "description": "Cold start benchmarking data from the Swiss Federal Statistical Office.",
+            "columns": [
+                {
+                    "name": "ofs_id",
+                    "type": "SERIAL",
+                    "primary_key": true
+                },
+                {
+                    "name": "industry_domain",
+                    "type": "VARCHAR"
+                },
+                {
+                    "name": "professional_position",
+                    "type": "VARCHAR",
+                    "description": "Upper management vs. execution"
+                },
+                {
+                    "name": "age_bracket",
+                    "type": "VARCHAR"
+                },
+                {
+                    "name": "gender",
+                    "type": "VARCHAR"
+                },
+                {
+                    "name": "gross_monthly_median_wage",
+                    "type": "NUMERIC"
+                },
+                {
+                    "name": "turnover_rate",
+                    "type": "NUMERIC",
+                    "description": "Used as the reference class baseline for Markov transitions"
+                }
+            ]
+        }
+    ]
+}
