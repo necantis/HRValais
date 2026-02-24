@@ -153,13 +153,12 @@ def _map_ibm_to_pillars(row: pd.Series) -> dict:
 # ---------------------------------------------------------------------------
 
 def run_seed() -> None:
-    session = get_session()
-    try:
+    with get_session() as session:
         _seed_firms(session)
         firm_map = {f.name: f.firm_id for f in session.query(Firm).all()}
         firm_key_to_id = {
             "firm_a": firm_map.get("Alpina Services SA"),
-            "firm_b": firm_map.get("Rhône Industrie Sàrl"),
+            "firm_b": firm_map.get("Rh\u00f4ne Industrie S\u00e0rl"),
             "firm_c": firm_map.get("HR Valais (Platform)"),
         }
 
@@ -168,14 +167,7 @@ def run_seed() -> None:
         _seed_ibm_responses(session, firm_key_to_id)
         _seed_synthetic_longitudinal(session, firm_key_to_id)
 
-        session.commit()
-        logger.info("✅ Seed complete.")
-    except Exception as e:
-        session.rollback()
-        logger.exception(f"Seed failed: {e}")
-        raise
-    finally:
-        session.close()
+    logger.info("Seed complete.")
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +176,7 @@ def run_seed() -> None:
 
 def _seed_firms(session) -> None:
     existing = {f.name for f in session.query(Firm).all()}
+    added = False
     for key, info in DEMO_FIRMS.items():
         if info["name"] not in existing:
             session.add(Firm(
@@ -191,12 +184,15 @@ def _seed_firms(session) -> None:
                 name=info["name"],
                 industry_domain=info["industry_domain"],
             ))
-    session.flush()
+            added = True
+    if added:
+        session.flush()
     logger.info("Firms seeded.")
 
 
 def _seed_users(session, firm_key_to_id: dict) -> None:
     existing = {u.username for u in session.query(User).all()}
+    added = False
     for u in DEMO_USERS:
         if u["username"] not in existing:
             session.add(User(
@@ -207,7 +203,9 @@ def _seed_users(session, firm_key_to_id: dict) -> None:
                 hashed_password=hash_password(u["password"]),
                 firm_id=firm_key_to_id.get(u["firm_key"]) if u["firm_key"] else None,
             ))
-    session.flush()
+            added = True
+    if added:
+        session.flush()
     logger.info("Users seeded.")
 
 

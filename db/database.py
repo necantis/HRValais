@@ -4,10 +4,10 @@ SQLAlchemy engine, session factory, and DB initialisation.
 """
 
 import logging
-import os
+from contextlib import contextmanager
 from pathlib import Path
 
-from sqlalchemy import create_engine, event, text
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
 
 from db.models import Base
@@ -25,7 +25,7 @@ DATA_DIR = _ROOT / "data"
 # Engine & session
 # ---------------------------------------------------------------------------
 _engine = None
-_SessionLocal = None
+_SessionFactory = None
 
 
 def get_engine():
@@ -36,7 +36,7 @@ def get_engine():
             connect_args={"check_same_thread": False},
             echo=False,
         )
-        # Enable WAL mode for better concurrent reads
+
         @event.listens_for(_engine, "connect")
         def _set_wal(dbapi_con, _):
             dbapi_con.execute("PRAGMA journal_mode=WAL")
@@ -44,11 +44,31 @@ def get_engine():
     return _engine
 
 
-def get_session() -> Session:
-    global _SessionLocal
-    if _SessionLocal is None:
-        _SessionLocal = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
-    return _SessionLocal()
+def _get_factory():
+    global _SessionFactory
+    if _SessionFactory is None:
+        _SessionFactory = sessionmaker(bind=get_engine(), autocommit=False, autoflush=False)
+    return _SessionFactory
+
+
+@contextmanager
+def get_session():
+    """
+    Context-manager session. Use as:
+        with get_session() as s:
+            s.query(...)
+    Commits on success, rolls back on exception, always closes.
+    """
+    factory = _get_factory()
+    session: Session = factory()
+    try:
+        yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
 
 # ---------------------------------------------------------------------------
@@ -63,7 +83,6 @@ def init_db(force_reseed: bool = False) -> None:
     Base.metadata.create_all(engine)
     logger.info("Tables ensured.")
 
-    # Check if already seeded
     with get_session() as session:
         from db.models import Firm
         count = session.query(Firm).count()

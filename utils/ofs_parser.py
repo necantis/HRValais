@@ -123,8 +123,11 @@ def parse_wages_px(path: Path) -> pd.DataFrame:
     meta = _parse_px_header(header_text)
 
     # Discover STUB (row dimensions) and HEADING (column dimensions)
-    stub = [s.strip() for s in meta.get("STUB", "").split(",") if s.strip()]
-    heading = [s.strip() for s in meta.get("HEADING", "").split(",") if s.strip()]
+    # Dimension names may be comma-separated and quoted, e.g.: STUB="Jahr","Sektor"
+    stub_raw = meta.get("STUB", "")
+    heading_raw = meta.get("HEADING", "")
+    stub = [s.strip().strip('"') for s in stub_raw.split(',') if s.strip().strip('"')]
+    heading = [s.strip().strip('"') for s in heading_raw.split(',') if s.strip().strip('"')]
 
     all_dims = stub + heading
     # Build list of category labels per dimension
@@ -132,7 +135,7 @@ def parse_wages_px(path: Path) -> pd.DataFrame:
     for dim in all_dims:
         labels = _get_values_for_dim(meta, dim)
         if not labels:
-            logger.warning(f"No VALUES found for dimension '{dim}' — skipping parse.")
+            logger.warning(f"No VALUES found for dimension '{dim}' — falling back to synthetic.")
             return _synthetic_wages_fallback()
         dim_values[dim] = labels
 
@@ -182,14 +185,17 @@ def parse_turnover_px(path: Path) -> pd.DataFrame:
     header_text = text[:data_idx]
     meta = _parse_px_header(header_text)
 
-    stub = [s.strip() for s in meta.get("STUB", "").split(",") if s.strip()]
-    heading = [s.strip() for s in meta.get("HEADING", "").split(",") if s.strip()]
+    stub_raw = meta.get("STUB", "")
+    heading_raw = meta.get("HEADING", "")
+    stub = [s.strip().strip('"') for s in stub_raw.split(',') if s.strip().strip('"')]
+    heading = [s.strip().strip('"') for s in heading_raw.split(',') if s.strip().strip('"')]
     all_dims = stub + heading
 
     dim_values: dict[str, list[str]] = {}
     for dim in all_dims:
         labels = _get_values_for_dim(meta, dim)
         if not labels:
+            logger.warning(f"No VALUES for '{dim}' in turnover .px — using synthetic.")
             return _synthetic_turnover_fallback()
         dim_values[dim] = labels
 

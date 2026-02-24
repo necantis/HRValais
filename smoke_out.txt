@@ -1,0 +1,1910 @@
+﻿python : INFO | 
+Tables ensured.
+At line:1 char:1
++ python -X utf8 
+smoke_test.py 2>&1 
+| Out-File 
+-FilePath 
+smoke_out.txt  ...
++ ~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: (I   
+ NFO | Tables e    
+nsured.:String    
+) [], RemoteEx    
+ception
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 
+INFO | DB empty 
+ÔÇö running 
+cold-start seed.
+INFO | Firms 
+seeded.
+INFO | Users 
+seeded.
+WARNING | No 
+VALUES found for 
+dimension 'Jahr"' 
+ÔÇö skipping parse.
+WARNING | Using 
+OFS-calibrated 
+SYNTHETIC wage 
+data (px parse 
+failed).
+WARNING | Using 
+OFS-calibrated 
+SYNTHETIC turnover 
+data (px parse 
+failed).
+INFO | OFS data 
+seeded (SYNTHETIC 
+FALLBACK).
+ERROR | Seed 
+failed: (sqlite3.In
+tegrityError) 
+FOREIGN KEY 
+constraint failed
+[SQL: INSERT INTO 
+survey_responses 
+(response_id, 
+user_id, firm_id, 
+timestamp, 
+recrutement_q1, 
+recrutement_q2, 
+recrutement_q3, 
+competences_q4, 
+competences_q5, 
+competences_q6, 
+performance_q7, 
+performance_q8, 
+performance_q9, 
+remuneration_q10, 
+remuneration_q11, 
+remuneration_q12, 
+qvt_q13, qvt_q14, 
+qvt_q15, 
+droit_q16, 
+droit_q17, 
+droit_q18, 
+transverse_q19, 
+transverse_q20, 
+transverse_q21, 
+recrutement_avg, 
+competences_avg, 
+performance_avg, 
+remuneration_avg, 
+qvt_avg, 
+droit_avg, 
+transverse_avg, 
+age, position, 
+gender, 
+engagement_state, 
+attrition_flag) 
+VALUES (?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?)]
+[parameters: [('f42
+7d24d-90ec-44d2-a39
+b-57833086cdda', '0
+0000000-0000-0000-0
+000-000000000001', 
+'9e5d5459-46d3-4cff
+-aa27-eb55ddd7ea99'
+, '2022-01-01 
+00:00:00.000000', 
+5.0, 
+2.333333333333333, 
+1.0, 1.0, 2.0, 3.66
+66666666666665, 3.6
+666666666666665, 
+5.0, 1.0, 
+2.049815692469721, 
+1.0, 1.0, 1.0, 
+2.333333333333333, 
+1.0, 1.6, 2.0, 
+1.0, 1.0, 5.0, 
+1.8, 2.777777777777
+7772, 
+2.222222222222222, 
+3.222222222222222, 
+1.3499385641565738,
+ 1.4444444444444444
+, 1.533333333333333
+2, 2.6, 41, 
+'Execution', 
+'Femmes', 
+'Passively 
+Looking', 1), ('647
+f7426-03db-46d6-bc4
+6-1cbb1a489397', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-01 
+00:00:00.000000', 
+2.333333333333333, 
+3.6666666666666665,
+ 5.0, 3.0, 2.0, 
+2.333333333333333, 
+5.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.8680358083201685
+, 
+4.428571428571429, 
+2.333333333333333, 
+3.6666666666666665,
+ 3.6666666666666665
+, 1.666666666666666
+5, 2.0, 2.4, 1.0, 
+5.0, 
+2.333333333333333, 
+2.0, 3.666666666666
+6665, 
+2.444444444444444, 
+3.6666666666666665,
+ 
+2.876646856741644, 
+3.0, 1.8, 3.1111111
+111111107, 49, 
+'Execution', 
+'Hommes', 
+'Content', 0), ('7c
+e35390-b77b-40f5-a9
+0f-0f3f5a09b51c', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-01 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 
+2.333333333333333, 
+3.0, 1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 3.6666666666666665
+, 3.666666666666666
+5, 1.22769878883622
+96, 
+2.142857142857143, 
+1.0, 3.666666666666
+6665, 5.0, 3.666666
+6666666665, 1.0, 
+1.0, 1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.7, 3.66666666666
+66665, 
+2.111111111111111, 
+3.6666666666666665,
+ 1.4568519772311241
+, 
+4.111111111111111, 
+1.0, 
+2.566666666666667, 
+37, 'Execution', 
+'Hommes', 
+'Content', 1), ('85
+3b4d87-ef30-4656-80
+aa-89202cb70e40', '
+00000000-0000-0000-
+0000-000000000001',
+ 'd7818d42-f57a-415
+6-82ef-1818f2252e10
+', '2022-01-01 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 3.666666666666
+6665, 3.0, 1.0, 3.6
+666666666666665, 3.
+6666666666666665, 3
+.6666666666666665, 
+3.6666666666666665,
+ 1.4002106371774619
+, 1.0, 1.0, 3.66666
+66666666665, 5.0, 3
+.6666666666666665, 
+1.8, 1.0, 1.0, 3.66
+66666666666665, 3.6
+666666666666665, 
+1.8, 
+4.111111111111111, 
+2.5555555555555554,
+ 3.6666666666666665
+, 1.133403545725820
+7, 
+4.111111111111111, 
+1.2666666666666666,
+ 3.0444444444444443
+, 33, 'Execution', 
+'Femmes', 
+'Content', 0), ('32
+e09aa7-7e41-4ebf-ae
+17-3b9ee45d6e1f', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-01 
+00:00:00.000000', 
+2.333333333333333, 
+1.0, 5.0, 3.0, 
+1.0, 3.666666666666
+6665, 3.66666666666
+66665, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.5179568193786204
+, 1.285714285714285
+6, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.0, 1.66666666666
+66665, 1.2, 1.4, 
+1.0, 5.0, 
+2.333333333333333, 
+1.6, 2.777777777777
+7772, 2.55555555555
+55554, 
+3.222222222222222, 
+1.712334812808746, 
+2.1111111111111107,
+ 1.2, 
+2.977777777777778, 
+27, 'Execution', 
+'Hommes', 
+'Passively 
+Looking', 0), ('017
+48a99-998e-409b-b17
+9-6c234a73d544', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-02 
+00:00:00.000000', 
+5.0, 5.0, 3.6666666
+666666665, 
+2.333333333333333, 
+1.0, 3.666666666666
+6665, 3.66666666666
+66665, 5.0, 
+2.333333333333333, 
+1.4337019483938915,
+ 1.5714285714285714
+, 1.0, 
+2.333333333333333, 
+5.0, 1.0, 1.7, 
+2.2, 1.0, 3.6666666
+666666665, 5.0, 
+1.8, 
+4.555555555555555, 
+2.3333333333333335,
+ 3.6666666666666665
+, 1.335043506607487
+5, 2.77777777777777
+72, 1.6333333333333
+335, 
+3.488888888888889, 
+32, 'Execution', 
+'Hommes', 
+'Content', 0), ('d7
+8f4256-a61a-45ff-9d
+05-59405590be4a', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-02 
+00:00:00.000000', 
+1.0, 3.666666666666
+6665, 1.0, 3.0, 
+1.0, 5.0, 5.0, 
+1.0, 
+2.333333333333333, 
+1.3498683517640864,
+ 3.5714285714285716
+, 5.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 
+2.333333333333333, 
+1.1, 1.0, 1.0, 
+1.0, 1.0, 2.2, 1.88
+88888888888886, 
+3.0, 2.777777777777
+7772, 3.30709897439
+75527, 2.7777777777
+777772, 1.033333333
+3333334, 1.40000000
+00000001, 59, 
+'Execution', 
+'Femmes', 
+'Passively 
+Looking', 0), ('f7f
+80da2-bff9-4663-a8a
+e-68f1e4313aaa', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-02 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 
+2.333333333333333, 
+2.333333333333333, 
+1.0, 3.666666666666
+6665, 5.0, 3.666666
+6666666665, 3.66666
+66666666665, 1.3547
+130068457083, 
+4.142857142857142, 
+2.333333333333333, 
+3.6666666666666665,
+ 5.0, 1.66666666666
+66665, 1.1, 1.0, 
+1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.1, 3.66666666666
+66665, 2.3333333333
+333335, 
+4.111111111111111, 
+2.610301161012061, 
+3.444444444444444, 
+1.0333333333333334,
+ 2.3666666666666667
+, 30, 'Execution', 
+'Hommes', 
+'Content', 0)  ... 
+displaying 10 of 
+1470 total bound 
+parameter sets ... 
+ ('38e61445-ff00-47
+b4-9c21-29734a71115
+f', '00000000-0000-
+0000-0000-000000000
+001', '9e5d5459-46d
+3-4cff-aa27-eb55ddd
+7ea99', 
+'2022-10-21 
+00:00:00.000000', 
+2.333333333333333, 
+5.0, 5.0, 3.0, 
+2.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 
+2.333333333333333, 
+2.333333333333333, 
+1.9228014744602422,
+ 1.8571428571428572
+, 1.0, 
+2.333333333333333, 
+5.0, 1.0, 1.9, 
+2.6, 1.0, 5.0, 
+2.333333333333333, 
+2.7, 
+4.111111111111111, 
+2.444444444444444, 
+2.7777777777777772,
+ 
+1.593314777201033, 
+2.7777777777777772,
+ 1.8333333333333333
+, 3.344444444444444
+6, 49, 
+'Execution', 
+'Hommes', 
+'Content', 0), ('4a
+89aadc-c9a1-4f01-8d
+ce-2fa7fa549bf8', '
+00000000-0000-0000-
+0000-000000000001',
+ 'd7818d42-f57a-415
+6-82ef-1818f2252e10
+', '2022-10-21 
+00:00:00.000000', 3
+.6666666666666665, 
+2.333333333333333, 
+1.0, 3.0, 2.0, 
+5.0, 3.666666666666
+6665, 3.66666666666
+66665, 5.0, 1.71511
+32174828856, 1.2857
+142857142856, 1.0, 
+5.0, 
+2.333333333333333, 
+3.0, 1.4, 1.4, 
+1.0, 1.0, 3.6666666
+666666665, 1.6, 2.3
+333333333333335, 3.
+3333333333333335, 
+4.111111111111111, 
+1.3336091677323905,
+ 
+3.444444444444444, 
+1.2666666666666666,
+ 2.0888888888888886
+, 34, 'Execution', 
+'Hommes', 
+'Content', 0)]]
+(Background on 
+this error at: http
+s://sqlalche.me/e/2
+0/gkpj)
+Traceback (most 
+recent call last):
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1936, 
+in _exec_single_con
+text
+    self.dialect.do
+_executemany(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\defa
+ult.py", line 949, 
+in do_executemany
+    cursor.executem
+any(statement, 
+parameters)
+    ~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^
+^^^^^^^
+sqlite3.IntegrityEr
+ror: FOREIGN KEY 
+constraint failed
+
+The above 
+exception was the 
+direct cause of 
+the following 
+exception:
+
+Traceback (most 
+recent call last):
+  File "C:\Users\ri
+ccardo.bonazzi\Docu
+ments\GitHub\HRVala
+is\db\seed.py", 
+line 168, in 
+run_seed
+    _seed_ibm_respo
+nses(session, 
+firm_key_to_id)
+    ~~~~~~~~~~~~~~~
+~~~~^^^^^^^^^^^^^^^
+^^^^^^^^^^
+  File "C:\Users\ri
+ccardo.bonazzi\Docu
+ments\GitHub\HRVala
+is\db\seed.py", 
+line 318, in 
+_seed_ibm_responses
+    session.bulk_sa
+ve_objects(batch)
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~^^^^^^^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\session
+.py", line 4564, 
+in 
+bulk_save_objects
+    self._bulk_save
+_mappings(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<5 lines>...
+        
+render_nulls=False,
+        
+^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\session
+.py", line 4741, 
+in 
+_bulk_save_mappings
+    with util.safe_
+reraise():
+         
+~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\util\langhe
+lpers.py", line 
+224, in __exit__
+    raise exc_value
+.with_traceback(exc
+_tb)
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\session
+.py", line 4730, 
+in 
+_bulk_save_mappings
+    bulk_persistenc
+e._bulk_insert(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<4 lines>...
+        render_null
+s=render_nulls,
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\bulk_pe
+rsistence.py", 
+line 222, in 
+_bulk_insert
+    result = persis
+tence._emit_insert_
+statements(
+        
+base_mapper,
+    ...<6 lines>...
+        execution_o
+ptions=execution_op
+tions,
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\persist
+ence.py", line 
+1048, in _emit_inse
+rt_statements
+    result = 
+connection.execute(
+        statement, 
+multiparams, execut
+ion_options=executi
+on_options
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1419, 
+in execute
+    return meth(
+        self,
+        distilled_p
+arameters,
+        
+execution_options 
+or NO_OPTIONS,
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\sql\element
+s.py", line 527, 
+in _execute_on_conn
+ection
+    return connecti
+on._execute_clausee
+lement(
+           ~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+~~~~~~^
+        self, 
+distilled_params, 
+execution_options
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1641, 
+in _execute_clausee
+lement
+    ret = self._exe
+cute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=c
+ache_hit,
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1846, 
+in _execute_context
+    return self._ex
+ec_single_context(
+           ~~~~~~~~
+~~~~~~~~~~~~~~~~~^
+        dialect, 
+context, 
+statement, 
+parameters
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1986, 
+in _exec_single_con
+text
+    self._handle_db
+api_exception(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~^
+        e, 
+str_statement, effe
+ctive_parameters, 
+cursor, context
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 2363, 
+in _handle_dbapi_ex
+ception
+    raise sqlalchem
+y_exception.with_tr
+aceback(exc_info[2]
+) from e
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1936, 
+in _exec_single_con
+text
+    self.dialect.do
+_executemany(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\defa
+ult.py", line 949, 
+in do_executemany
+    cursor.executem
+any(statement, 
+parameters)
+    ~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^
+^^^^^^^
+sqlalchemy.exc.Inte
+grityError: (sqlite
+3.IntegrityError) 
+FOREIGN KEY 
+constraint failed
+[SQL: INSERT INTO 
+survey_responses 
+(response_id, 
+user_id, firm_id, 
+timestamp, 
+recrutement_q1, 
+recrutement_q2, 
+recrutement_q3, 
+competences_q4, 
+competences_q5, 
+competences_q6, 
+performance_q7, 
+performance_q8, 
+performance_q9, 
+remuneration_q10, 
+remuneration_q11, 
+remuneration_q12, 
+qvt_q13, qvt_q14, 
+qvt_q15, 
+droit_q16, 
+droit_q17, 
+droit_q18, 
+transverse_q19, 
+transverse_q20, 
+transverse_q21, 
+recrutement_avg, 
+competences_avg, 
+performance_avg, 
+remuneration_avg, 
+qvt_avg, 
+droit_avg, 
+transverse_avg, 
+age, position, 
+gender, 
+engagement_state, 
+attrition_flag) 
+VALUES (?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?)]
+[parameters: [('f42
+7d24d-90ec-44d2-a39
+b-57833086cdda', '0
+0000000-0000-0000-0
+000-000000000001', 
+'9e5d5459-46d3-4cff
+-aa27-eb55ddd7ea99'
+, '2022-01-01 
+00:00:00.000000', 
+5.0, 
+2.333333333333333, 
+1.0, 1.0, 2.0, 3.66
+66666666666665, 3.6
+666666666666665, 
+5.0, 1.0, 
+2.049815692469721, 
+1.0, 1.0, 1.0, 
+2.333333333333333, 
+1.0, 1.6, 2.0, 
+1.0, 1.0, 5.0, 
+1.8, 2.777777777777
+7772, 
+2.222222222222222, 
+3.222222222222222, 
+1.3499385641565738,
+ 1.4444444444444444
+, 1.533333333333333
+2, 2.6, 41, 
+'Execution', 
+'Femmes', 
+'Passively 
+Looking', 1), ('647
+f7426-03db-46d6-bc4
+6-1cbb1a489397', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-01 
+00:00:00.000000', 
+2.333333333333333, 
+3.6666666666666665,
+ 5.0, 3.0, 2.0, 
+2.333333333333333, 
+5.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.8680358083201685
+, 
+4.428571428571429, 
+2.333333333333333, 
+3.6666666666666665,
+ 3.6666666666666665
+, 1.666666666666666
+5, 2.0, 2.4, 1.0, 
+5.0, 
+2.333333333333333, 
+2.0, 3.666666666666
+6665, 
+2.444444444444444, 
+3.6666666666666665,
+ 
+2.876646856741644, 
+3.0, 1.8, 3.1111111
+111111107, 49, 
+'Execution', 
+'Hommes', 
+'Content', 0), ('7c
+e35390-b77b-40f5-a9
+0f-0f3f5a09b51c', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-01 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 
+2.333333333333333, 
+3.0, 1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 3.6666666666666665
+, 3.666666666666666
+5, 1.22769878883622
+96, 
+2.142857142857143, 
+1.0, 3.666666666666
+6665, 5.0, 3.666666
+6666666665, 1.0, 
+1.0, 1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.7, 3.66666666666
+66665, 
+2.111111111111111, 
+3.6666666666666665,
+ 1.4568519772311241
+, 
+4.111111111111111, 
+1.0, 
+2.566666666666667, 
+37, 'Execution', 
+'Hommes', 
+'Content', 1), ('85
+3b4d87-ef30-4656-80
+aa-89202cb70e40', '
+00000000-0000-0000-
+0000-000000000001',
+ 'd7818d42-f57a-415
+6-82ef-1818f2252e10
+', '2022-01-01 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 3.666666666666
+6665, 3.0, 1.0, 3.6
+666666666666665, 3.
+6666666666666665, 3
+.6666666666666665, 
+3.6666666666666665,
+ 1.4002106371774619
+, 1.0, 1.0, 3.66666
+66666666665, 5.0, 3
+.6666666666666665, 
+1.8, 1.0, 1.0, 3.66
+66666666666665, 3.6
+666666666666665, 
+1.8, 
+4.111111111111111, 
+2.5555555555555554,
+ 3.6666666666666665
+, 1.133403545725820
+7, 
+4.111111111111111, 
+1.2666666666666666,
+ 3.0444444444444443
+, 33, 'Execution', 
+'Femmes', 
+'Content', 0), ('32
+e09aa7-7e41-4ebf-ae
+17-3b9ee45d6e1f', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-01 
+00:00:00.000000', 
+2.333333333333333, 
+1.0, 5.0, 3.0, 
+1.0, 3.666666666666
+6665, 3.66666666666
+66665, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.5179568193786204
+, 1.285714285714285
+6, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.0, 1.66666666666
+66665, 1.2, 1.4, 
+1.0, 5.0, 
+2.333333333333333, 
+1.6, 2.777777777777
+7772, 2.55555555555
+55554, 
+3.222222222222222, 
+1.712334812808746, 
+2.1111111111111107,
+ 1.2, 
+2.977777777777778, 
+27, 'Execution', 
+'Hommes', 
+'Passively 
+Looking', 0), ('017
+48a99-998e-409b-b17
+9-6c234a73d544', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-02 
+00:00:00.000000', 
+5.0, 5.0, 3.6666666
+666666665, 
+2.333333333333333, 
+1.0, 3.666666666666
+6665, 3.66666666666
+66665, 5.0, 
+2.333333333333333, 
+1.4337019483938915,
+ 1.5714285714285714
+, 1.0, 
+2.333333333333333, 
+5.0, 1.0, 1.7, 
+2.2, 1.0, 3.6666666
+666666665, 5.0, 
+1.8, 
+4.555555555555555, 
+2.3333333333333335,
+ 3.6666666666666665
+, 1.335043506607487
+5, 2.77777777777777
+72, 1.6333333333333
+335, 
+3.488888888888889, 
+32, 'Execution', 
+'Hommes', 
+'Content', 0), ('d7
+8f4256-a61a-45ff-9d
+05-59405590be4a', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-02 
+00:00:00.000000', 
+1.0, 3.666666666666
+6665, 1.0, 3.0, 
+1.0, 5.0, 5.0, 
+1.0, 
+2.333333333333333, 
+1.3498683517640864,
+ 3.5714285714285716
+, 5.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 
+2.333333333333333, 
+1.1, 1.0, 1.0, 
+1.0, 1.0, 2.2, 1.88
+88888888888886, 
+3.0, 2.777777777777
+7772, 3.30709897439
+75527, 2.7777777777
+777772, 1.033333333
+3333334, 1.40000000
+00000001, 59, 
+'Execution', 
+'Femmes', 
+'Passively 
+Looking', 0), ('f7f
+80da2-bff9-4663-a8a
+e-68f1e4313aaa', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-02 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 
+2.333333333333333, 
+2.333333333333333, 
+1.0, 3.666666666666
+6665, 5.0, 3.666666
+6666666665, 3.66666
+66666666665, 1.3547
+130068457083, 
+4.142857142857142, 
+2.333333333333333, 
+3.6666666666666665,
+ 5.0, 1.66666666666
+66665, 1.1, 1.0, 
+1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.1, 3.66666666666
+66665, 2.3333333333
+333335, 
+4.111111111111111, 
+2.610301161012061, 
+3.444444444444444, 
+1.0333333333333334,
+ 2.3666666666666667
+, 30, 'Execution', 
+'Hommes', 
+'Content', 0)  ... 
+displaying 10 of 
+1470 total bound 
+parameter sets ... 
+ ('38e61445-ff00-47
+b4-9c21-29734a71115
+f', '00000000-0000-
+0000-0000-000000000
+001', '9e5d5459-46d
+3-4cff-aa27-eb55ddd
+7ea99', 
+'2022-10-21 
+00:00:00.000000', 
+2.333333333333333, 
+5.0, 5.0, 3.0, 
+2.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 
+2.333333333333333, 
+2.333333333333333, 
+1.9228014744602422,
+ 1.8571428571428572
+, 1.0, 
+2.333333333333333, 
+5.0, 1.0, 1.9, 
+2.6, 1.0, 5.0, 
+2.333333333333333, 
+2.7, 
+4.111111111111111, 
+2.444444444444444, 
+2.7777777777777772,
+ 
+1.593314777201033, 
+2.7777777777777772,
+ 1.8333333333333333
+, 3.344444444444444
+6, 49, 
+'Execution', 
+'Hommes', 
+'Content', 0), ('4a
+89aadc-c9a1-4f01-8d
+ce-2fa7fa549bf8', '
+00000000-0000-0000-
+0000-000000000001',
+ 'd7818d42-f57a-415
+6-82ef-1818f2252e10
+', '2022-10-21 
+00:00:00.000000', 3
+.6666666666666665, 
+2.333333333333333, 
+1.0, 3.0, 2.0, 
+5.0, 3.666666666666
+6665, 3.66666666666
+66665, 5.0, 1.71511
+32174828856, 1.2857
+142857142856, 1.0, 
+5.0, 
+2.333333333333333, 
+3.0, 1.4, 1.4, 
+1.0, 1.0, 3.6666666
+666666665, 1.6, 2.3
+333333333333335, 3.
+3333333333333335, 
+4.111111111111111, 
+1.3336091677323905,
+ 
+3.444444444444444, 
+1.2666666666666666,
+ 2.0888888888888886
+, 34, 'Execution', 
+'Hommes', 
+'Content', 0)]]
+(Background on 
+this error at: http
+s://sqlalche.me/e/2
+0/gkpj)
+=== 1. Testing imports ===
+All imports OK Ô£à
+
+=== 2. DB init + seed ===
+Traceback (most 
+recent call last):
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1936, 
+in _exec_single_con
+text
+    self.dialect.do
+_executemany(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\defa
+ult.py", line 949, 
+in do_executemany
+    cursor.executem
+any(statement, 
+parameters)
+    ~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^
+^^^^^^^
+sqlite3.IntegrityEr
+ror: FOREIGN KEY 
+constraint failed
+
+The above 
+exception was the 
+direct cause of 
+the following 
+exception:
+
+Traceback (most 
+recent call last):
+  File "C:\Users\ri
+ccardo.bonazzi\Docu
+ments\GitHub\HRVala
+is\smoke_test.py", 
+line 16, in 
+<module>
+    init_db()
+    ~~~~~~~^^
+  File "C:\Users\ri
+ccardo.bonazzi\Docu
+ments\GitHub\HRVala
+is\db\database.py",
+ line 74, in 
+init_db
+    run_seed()
+    ~~~~~~~~^^
+  File "C:\Users\ri
+ccardo.bonazzi\Docu
+ments\GitHub\HRVala
+is\db\seed.py", 
+line 168, in 
+run_seed
+    _seed_ibm_respo
+nses(session, 
+firm_key_to_id)
+    ~~~~~~~~~~~~~~~
+~~~~^^^^^^^^^^^^^^^
+^^^^^^^^^^
+  File "C:\Users\ri
+ccardo.bonazzi\Docu
+ments\GitHub\HRVala
+is\db\seed.py", 
+line 318, in 
+_seed_ibm_responses
+    session.bulk_sa
+ve_objects(batch)
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~^^^^^^^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\session
+.py", line 4564, 
+in 
+bulk_save_objects
+    self._bulk_save
+_mappings(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<5 lines>...
+        
+render_nulls=False,
+        
+^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\session
+.py", line 4741, 
+in 
+_bulk_save_mappings
+    with util.safe_
+reraise():
+         
+~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\util\langhe
+lpers.py", line 
+224, in __exit__
+    raise exc_value
+.with_traceback(exc
+_tb)
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\session
+.py", line 4730, 
+in 
+_bulk_save_mappings
+    bulk_persistenc
+e._bulk_insert(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~^
+        mapper,
+        ^^^^^^^
+    ...<4 lines>...
+        render_null
+s=render_nulls,
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\bulk_pe
+rsistence.py", 
+line 222, in 
+_bulk_insert
+    result = persis
+tence._emit_insert_
+statements(
+        
+base_mapper,
+    ...<6 lines>...
+        execution_o
+ptions=execution_op
+tions,
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\orm\persist
+ence.py", line 
+1048, in _emit_inse
+rt_statements
+    result = 
+connection.execute(
+        statement, 
+multiparams, execut
+ion_options=executi
+on_options
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1419, 
+in execute
+    return meth(
+        self,
+        distilled_p
+arameters,
+        
+execution_options 
+or NO_OPTIONS,
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\sql\element
+s.py", line 527, 
+in _execute_on_conn
+ection
+    return connecti
+on._execute_clausee
+lement(
+           ~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+~~~~~~^
+        self, 
+distilled_params, 
+execution_options
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1641, 
+in _execute_clausee
+lement
+    ret = self._exe
+cute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=c
+ache_hit,
+    )
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1846, 
+in _execute_context
+    return self._ex
+ec_single_context(
+           ~~~~~~~~
+~~~~~~~~~~~~~~~~~^
+        dialect, 
+context, 
+statement, 
+parameters
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1986, 
+in _exec_single_con
+text
+    self._handle_db
+api_exception(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~^
+        e, 
+str_statement, effe
+ctive_parameters, 
+cursor, context
+        ^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
+^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 2363, 
+in _handle_dbapi_ex
+ception
+    raise sqlalchem
+y_exception.with_tr
+aceback(exc_info[2]
+) from e
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\base
+.py", line 1936, 
+in _exec_single_con
+text
+    self.dialect.do
+_executemany(
+    ~~~~~~~~~~~~~~~
+~~~~~~~~~~~~^
+        cursor,
+        ^^^^^^^
+    ...<2 lines>...
+        context,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\ri
+ccardo.bonazzi\AppD
+ata\Local\Programs\
+Python\Python313\Li
+b\site-packages\sql
+alchemy\engine\defa
+ult.py", line 949, 
+in do_executemany
+    cursor.executem
+any(statement, 
+parameters)
+    ~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^
+^^^^^^^
+sqlalchemy.exc.Inte
+grityError: (sqlite
+3.IntegrityError) 
+FOREIGN KEY 
+constraint failed
+[SQL: INSERT INTO 
+survey_responses 
+(response_id, 
+user_id, firm_id, 
+timestamp, 
+recrutement_q1, 
+recrutement_q2, 
+recrutement_q3, 
+competences_q4, 
+competences_q5, 
+competences_q6, 
+performance_q7, 
+performance_q8, 
+performance_q9, 
+remuneration_q10, 
+remuneration_q11, 
+remuneration_q12, 
+qvt_q13, qvt_q14, 
+qvt_q15, 
+droit_q16, 
+droit_q17, 
+droit_q18, 
+transverse_q19, 
+transverse_q20, 
+transverse_q21, 
+recrutement_avg, 
+competences_avg, 
+performance_avg, 
+remuneration_avg, 
+qvt_avg, 
+droit_avg, 
+transverse_avg, 
+age, position, 
+gender, 
+engagement_state, 
+attrition_flag) 
+VALUES (?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?, ?, ?, 
+?, ?, ?, ?)]
+[parameters: [('f42
+7d24d-90ec-44d2-a39
+b-57833086cdda', '0
+0000000-0000-0000-0
+000-000000000001', 
+'9e5d5459-46d3-4cff
+-aa27-eb55ddd7ea99'
+, '2022-01-01 
+00:00:00.000000', 
+5.0, 
+2.333333333333333, 
+1.0, 1.0, 2.0, 3.66
+66666666666665, 3.6
+666666666666665, 
+5.0, 1.0, 
+2.049815692469721, 
+1.0, 1.0, 1.0, 
+2.333333333333333, 
+1.0, 1.6, 2.0, 
+1.0, 1.0, 5.0, 
+1.8, 2.777777777777
+7772, 
+2.222222222222222, 
+3.222222222222222, 
+1.3499385641565738,
+ 1.4444444444444444
+, 1.533333333333333
+2, 2.6, 41, 
+'Execution', 
+'Femmes', 
+'Passively 
+Looking', 1), ('647
+f7426-03db-46d6-bc4
+6-1cbb1a489397', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-01 
+00:00:00.000000', 
+2.333333333333333, 
+3.6666666666666665,
+ 5.0, 3.0, 2.0, 
+2.333333333333333, 
+5.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.8680358083201685
+, 
+4.428571428571429, 
+2.333333333333333, 
+3.6666666666666665,
+ 3.6666666666666665
+, 1.666666666666666
+5, 2.0, 2.4, 1.0, 
+5.0, 
+2.333333333333333, 
+2.0, 3.666666666666
+6665, 
+2.444444444444444, 
+3.6666666666666665,
+ 
+2.876646856741644, 
+3.0, 1.8, 3.1111111
+111111107, 49, 
+'Execution', 
+'Hommes', 
+'Content', 0), ('7c
+e35390-b77b-40f5-a9
+0f-0f3f5a09b51c', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-01 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 
+2.333333333333333, 
+3.0, 1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 3.6666666666666665
+, 3.666666666666666
+5, 1.22769878883622
+96, 
+2.142857142857143, 
+1.0, 3.666666666666
+6665, 5.0, 3.666666
+6666666665, 1.0, 
+1.0, 1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.7, 3.66666666666
+66665, 
+2.111111111111111, 
+3.6666666666666665,
+ 1.4568519772311241
+, 
+4.111111111111111, 
+1.0, 
+2.566666666666667, 
+37, 'Execution', 
+'Hommes', 
+'Content', 1), ('85
+3b4d87-ef30-4656-80
+aa-89202cb70e40', '
+00000000-0000-0000-
+0000-000000000001',
+ 'd7818d42-f57a-415
+6-82ef-1818f2252e10
+', '2022-01-01 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 3.666666666666
+6665, 3.0, 1.0, 3.6
+666666666666665, 3.
+6666666666666665, 3
+.6666666666666665, 
+3.6666666666666665,
+ 1.4002106371774619
+, 1.0, 1.0, 3.66666
+66666666665, 5.0, 3
+.6666666666666665, 
+1.8, 1.0, 1.0, 3.66
+66666666666665, 3.6
+666666666666665, 
+1.8, 
+4.111111111111111, 
+2.5555555555555554,
+ 3.6666666666666665
+, 1.133403545725820
+7, 
+4.111111111111111, 
+1.2666666666666666,
+ 3.0444444444444443
+, 33, 'Execution', 
+'Femmes', 
+'Content', 0), ('32
+e09aa7-7e41-4ebf-ae
+17-3b9ee45d6e1f', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-01 
+00:00:00.000000', 
+2.333333333333333, 
+1.0, 5.0, 3.0, 
+1.0, 3.666666666666
+6665, 3.66666666666
+66665, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.5179568193786204
+, 1.285714285714285
+6, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.0, 1.66666666666
+66665, 1.2, 1.4, 
+1.0, 5.0, 
+2.333333333333333, 
+1.6, 2.777777777777
+7772, 2.55555555555
+55554, 
+3.222222222222222, 
+1.712334812808746, 
+2.1111111111111107,
+ 1.2, 
+2.977777777777778, 
+27, 'Execution', 
+'Hommes', 
+'Passively 
+Looking', 0), ('017
+48a99-998e-409b-b17
+9-6c234a73d544', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-02 
+00:00:00.000000', 
+5.0, 5.0, 3.6666666
+666666665, 
+2.333333333333333, 
+1.0, 3.666666666666
+6665, 3.66666666666
+66665, 5.0, 
+2.333333333333333, 
+1.4337019483938915,
+ 1.5714285714285714
+, 1.0, 
+2.333333333333333, 
+5.0, 1.0, 1.7, 
+2.2, 1.0, 3.6666666
+666666665, 5.0, 
+1.8, 
+4.555555555555555, 
+2.3333333333333335,
+ 3.6666666666666665
+, 1.335043506607487
+5, 2.77777777777777
+72, 1.6333333333333
+335, 
+3.488888888888889, 
+32, 'Execution', 
+'Hommes', 
+'Content', 0), ('d7
+8f4256-a61a-45ff-9d
+05-59405590be4a', '
+00000000-0000-0000-
+0000-000000000001',
+ '9e5d5459-46d3-4cf
+f-aa27-eb55ddd7ea99
+', '2022-01-02 
+00:00:00.000000', 
+1.0, 3.666666666666
+6665, 1.0, 3.0, 
+1.0, 5.0, 5.0, 
+1.0, 
+2.333333333333333, 
+1.3498683517640864,
+ 3.5714285714285716
+, 5.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 
+2.333333333333333, 
+1.1, 1.0, 1.0, 
+1.0, 1.0, 2.2, 1.88
+88888888888886, 
+3.0, 2.777777777777
+7772, 3.30709897439
+75527, 2.7777777777
+777772, 1.033333333
+3333334, 1.40000000
+00000001, 59, 
+'Execution', 
+'Femmes', 
+'Passively 
+Looking', 0), ('f7f
+80da2-bff9-4663-a8a
+e-68f1e4313aaa', '0
+0000000-0000-0000-0
+000-000000000001', 
+'d7818d42-f57a-4156
+-82ef-1818f2252e10'
+, '2022-01-02 
+00:00:00.000000', 3
+.6666666666666665, 
+5.0, 
+2.333333333333333, 
+2.333333333333333, 
+1.0, 3.666666666666
+6665, 5.0, 3.666666
+6666666665, 3.66666
+66666666665, 1.3547
+130068457083, 
+4.142857142857142, 
+2.333333333333333, 
+3.6666666666666665,
+ 5.0, 1.66666666666
+66665, 1.1, 1.0, 
+1.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 1.1, 3.66666666666
+66665, 2.3333333333
+333335, 
+4.111111111111111, 
+2.610301161012061, 
+3.444444444444444, 
+1.0333333333333334,
+ 2.3666666666666667
+, 30, 'Execution', 
+'Hommes', 
+'Content', 0)  ... 
+displaying 10 of 
+1470 total bound 
+parameter sets ... 
+ ('38e61445-ff00-47
+b4-9c21-29734a71115
+f', '00000000-0000-
+0000-0000-000000000
+001', '9e5d5459-46d
+3-4cff-aa27-eb55ddd
+7ea99', 
+'2022-10-21 
+00:00:00.000000', 
+2.333333333333333, 
+5.0, 5.0, 3.0, 
+2.0, 
+2.333333333333333, 
+3.6666666666666665,
+ 
+2.333333333333333, 
+2.333333333333333, 
+1.9228014744602422,
+ 1.8571428571428572
+, 1.0, 
+2.333333333333333, 
+5.0, 1.0, 1.9, 
+2.6, 1.0, 5.0, 
+2.333333333333333, 
+2.7, 
+4.111111111111111, 
+2.444444444444444, 
+2.7777777777777772,
+ 
+1.593314777201033, 
+2.7777777777777772,
+ 1.8333333333333333
+, 3.344444444444444
+6, 49, 
+'Execution', 
+'Hommes', 
+'Content', 0), ('4a
+89aadc-c9a1-4f01-8d
+ce-2fa7fa549bf8', '
+00000000-0000-0000-
+0000-000000000001',
+ 'd7818d42-f57a-415
+6-82ef-1818f2252e10
+', '2022-10-21 
+00:00:00.000000', 3
+.6666666666666665, 
+2.333333333333333, 
+1.0, 3.0, 2.0, 
+5.0, 3.666666666666
+6665, 3.66666666666
+66665, 5.0, 1.71511
+32174828856, 1.2857
+142857142856, 1.0, 
+5.0, 
+2.333333333333333, 
+3.0, 1.4, 1.4, 
+1.0, 1.0, 3.6666666
+666666665, 1.6, 2.3
+333333333333335, 3.
+3333333333333335, 
+4.111111111111111, 
+1.3336091677323905,
+ 
+3.444444444444444, 
+1.2666666666666666,
+ 2.0888888888888886
+, 34, 'Execution', 
+'Hommes', 
+'Content', 0)]]
+(Background on 
+this error at: http
+s://sqlalche.me/e/2
+0/gkpj)
