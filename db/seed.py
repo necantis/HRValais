@@ -153,7 +153,11 @@ def _map_ibm_to_pillars(row: pd.Series) -> dict:
 # ---------------------------------------------------------------------------
 
 def run_seed() -> None:
+    from sqlalchemy import text as _text
     with get_session() as session:
+        # Temporarily disable FK enforcement so bulk inserts can use pseudo user_ids
+        session.execute(_text("PRAGMA foreign_keys=OFF"))
+
         _seed_firms(session)
         firm_map = {f.name: f.firm_id for f in session.query(Firm).all()}
         firm_key_to_id = {
@@ -163,9 +167,13 @@ def run_seed() -> None:
         }
 
         _seed_users(session, firm_key_to_id)
+        session.flush()
+
         _seed_ofs(session)
         _seed_ibm_responses(session, firm_key_to_id)
         _seed_synthetic_longitudinal(session, firm_key_to_id)
+
+        session.execute(_text("PRAGMA foreign_keys=ON"))
 
     logger.info("Seed complete.")
 
@@ -211,15 +219,22 @@ def _seed_users(session, firm_key_to_id: dict) -> None:
 
 def _seed_ofs(session) -> None:
     if session.query(OFSMacroData).count() > 0:
-        logger.info("OFS data already present — skipping.")
+        logger.info("OFS data already present - skipping.")
         return
 
     wages_df, turnover_df, is_real = load_ofs_data(DATA_DIR)
 
-    # Merge on common dimensions if both have them
-    common_cols = ["industry_domain", "professional_position", "age_bracket", "gender", "year"]
-    wages_key = [c for c in common_cols if c in wages_df.columns]
-    turn_key = [c for c in common_cols if c in turnover_df.columns]
+    def safe_year(val):
+        try:
+            return int(val) if pd.notna(val) else None
+        except (ValueError, TypeError):
+            return None
+
+    def safe_float(val):
+        try:
+            return float(val) if pd.notna(val) else None
+        except (ValueError, TypeError):
+            return None
 
     # Insert wages
     for _, row in wages_df.iterrows():
@@ -229,13 +244,12 @@ def _seed_ofs(session) -> None:
             professional_position=str(row.get("professional_position", "Unknown")),
             age_bracket=str(row.get("age_bracket", "Unknown")),
             gender=str(row.get("gender", "Unknown")),
-            year=int(row["year"]) if pd.notna(row.get("year")) else None,
-            gross_monthly_median_wage=float(row["gross_monthly_median_wage"])
-            if pd.notna(row.get("gross_monthly_median_wage")) else None,
+            year=safe_year(row.get("year")),
+            gross_monthly_median_wage=safe_float(row.get("gross_monthly_median_wage")),
             turnover_rate=None,
         ))
 
-    # Insert turnover (separate rows — they come from a different table)
+    # Insert turnover
     for _, row in turnover_df.iterrows():
         session.add(OFSMacroData(
             source_file=row.get("source_file", "_206"),
@@ -243,10 +257,9 @@ def _seed_ofs(session) -> None:
             professional_position=str(row.get("professional_position", "Unknown")),
             age_bracket=str(row.get("age_bracket", "Unknown")),
             gender=str(row.get("gender", "Unknown")),
-            year=int(row["year"]) if pd.notna(row.get("year")) else None,
+            year=safe_year(row.get("year")),
             gross_monthly_median_wage=None,
-            turnover_rate=float(row["turnover_rate"])
-            if pd.notna(row.get("turnover_rate")) else None,
+            turnover_rate=safe_float(row.get("turnover_rate")),
         ))
 
     session.flush()

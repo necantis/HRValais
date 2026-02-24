@@ -67,7 +67,7 @@ def generate_survey_pdf(output_path: Path | None = None) -> Path:
     pdf.set_font("Helvetica", "B", 20)
     pdf.set_fill_color(15, 52, 96)
     pdf.set_text_color(255, 255, 255)
-    pdf.cell(0, 14, "HR Valais — Fiches pratiques RH", ln=True, align="C", fill=True)
+    pdf.cell(0, 14, "HR Valais - Fiches pratiques RH", ln=True, align="C", fill=True)
     pdf.ln(4)
 
     pdf.set_font("Helvetica", "", 10)
