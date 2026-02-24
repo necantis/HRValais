@@ -1,6 +1,6 @@
 """
 utils/pdf_generator.py
-Generates assets/fiches_pratiques.pdf — the HR Valais survey PDF.
+Generates assets/fiches_pratiques.pdf  -  the HR Valais survey PDF.
 Uses fpdf2. Called once on first app run if the PDF doesn't exist.
 """
 
@@ -73,7 +73,7 @@ def generate_survey_pdf(output_path: Path | None = None) -> Path:
     pdf.set_font("Helvetica", "", 10)
     pdf.set_text_color(80, 80, 80)
     pdf.cell(0, 6,
-             "Sondage annuel de bien-être et d'engagement — Répondez sur une échelle de 1 (pas du tout) à 5 (tout à fait).",
+             "Sondage annuel de bien-être et d'engagement  -  Répondez sur une échelle de 1 (pas du tout) à 5 (tout à fait).",
              ln=True, align="C")
     pdf.ln(6)
 
@@ -109,7 +109,7 @@ def generate_survey_pdf(output_path: Path | None = None) -> Path:
     # Footer
     pdf.set_font("Helvetica", "I", 8)
     pdf.set_text_color(150, 150, 150)
-    pdf.cell(0, 6, "© 2026 HR Valais — Prototype confidentiel. Ne pas diffuser.", align="C")
+    pdf.cell(0, 6, "(c) 2026 HR Valais  -  Prototype confidentiel. Ne pas diffuser.", align="C")
 
     pdf.output(str(output_path))
     return output_path
