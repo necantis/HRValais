@@ -1,30 +1,87 @@
 """
 pages/1_Survey.py
-Employee survey screen — 21 Likert items across 7 HR Valais pillars.
+Employee survey screen — 32 Likert items across 7 HR Valais dimensions.
+Scale: 0 = Je ne sais pas | 1 = Faible | 2 = Partiel | 3 = Avancé | 4 = Optimal
 Access: employee role only.
 """
 
 import sys
-from pathlib import Path
 import uuid
+from pathlib import Path
 from datetime import datetime
 
+import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from utils.auth import require_role, get_current_user
-from utils.pdf_generator import generate_survey_pdf, SURVEY_STRUCTURE
+from utils.pdf_generator import generate_survey_pdf, SURVEY_STRUCTURE, URL_MAPPING
 
 require_role("employee")
 user = get_current_user()
 
+# ---------------------------------------------------------------------------
+# Page header
+# ---------------------------------------------------------------------------
 st.title("📋 Sondage HR Valais — Fiches pratiques")
 st.caption(f"Bonjour {user['display_name']} · {datetime.now().strftime('%d %B %Y')}")
 
 # ---------------------------------------------------------------------------
-# Generate and embed the PDF
+# Inline CSS — clean radio groups + fiche link badges
+# ---------------------------------------------------------------------------
+st.markdown("""
+<style>
+/* Compact horizontal radio buttons */
+div[data-testid="stRadio"] > div {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+div[data-testid="stRadio"] label {
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #2D3748;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.18s, border-color 0.18s;
+    white-space: nowrap;
+}
+div[data-testid="stRadio"] label:hover {
+    border-color: #4F8EF7;
+    background: #1a2744;
+}
+/* Fiche badge link */
+.fiche-link {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #63B3ED;
+    text-decoration: none;
+    border: 1px solid #2D3748;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-top: 2px;
+    margin-bottom: 8px;
+    transition: background 0.15s;
+}
+.fiche-link:hover { background: #1A365D; }
+/* Question label styling */
+.q-label {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: #E2E8F0;
+    line-height: 1.45;
+    margin-bottom: 2px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------------------------------------------------
+# PDF viewer (optional)
 # ---------------------------------------------------------------------------
 pdf_path = generate_survey_pdf()
 
@@ -48,14 +105,28 @@ with st.expander("📄 Consulter les Fiches pratiques HR Valais (PDF)", expanded
 st.divider()
 st.subheader("Répondez au sondage annuel")
 st.markdown(
-    "Évaluez chaque affirmation sur une échelle de **1** (pas du tout d'accord) à **5** (tout à fait d'accord)."
+    "Évaluez chaque affirmation sur une échelle de **1** (faible) à **4** (optimal). "
+    "Choisissez **0 — Je ne sais pas** si vous ne pouvez pas évaluer l'affirmation."
 )
 
-PILLAR_ICONS = ["🤝", "🎓", "🏆", "💶", "🌿", "⚖️", "🌐"]
-LIKERT = {"1 — Pas du tout": 1, "2 — Plutôt non": 2, "3 — Neutre": 3,
-          "4 — Plutôt oui": 4, "5 — Tout à fait": 5}
-LIKERT_OPTIONS = list(LIKERT.keys())
+# ---------------------------------------------------------------------------
+# Scale definition
+# ---------------------------------------------------------------------------
+SCALE_OPTIONS = [
+    "0 — Je ne sais pas",
+    "1 — Faible",
+    "2 — Partiel",
+    "3 — Avancé",
+    "4 — Optimal",
+]
+SCALE_VALUES: dict[str, int] = {opt: int(opt[0]) for opt in SCALE_OPTIONS}
+DEFAULT_OPTION = "0 — Je ne sais pas"
 
+PILLAR_ICONS = ["🤝", "🎓", "🏆", "💶", "🌿", "⚖️", "🌐"]
+
+# ---------------------------------------------------------------------------
+# Survey form
+# ---------------------------------------------------------------------------
 answers: dict[str, int] = {}
 
 with st.form("survey_form"):
@@ -65,15 +136,29 @@ with st.form("survey_form"):
         with st.expander(f"{icon} Pilier {idx+1} : {pillar}", expanded=True):
             for q_text in questions:
                 key = f"q{q_num}"
-                val = st.select_slider(
-                    label=q_text,
-                    options=LIKERT_OPTIONS,
-                    value="3 — Neutre",
-                    key=key,
+                fiche_url = URL_MAPPING.get(q_text, "#")
+
+                # Question label + fiche link
+                st.markdown(
+                    f'<p class="q-label">{q_num}. {q_text}</p>'
+                    f'<a class="fiche-link" href="{fiche_url}" target="_blank">'
+                    f'📎 Fiche pratique HR Valais</a>',
+                    unsafe_allow_html=True,
                 )
-                answers[key] = LIKERT[val]
+
+                # Horizontal radio — label hidden (question already shown above)
+                val = st.radio(
+                    label=f"_{key}",        # hidden by label_visibility
+                    options=SCALE_OPTIONS,
+                    index=0,               # default: 0 — Je ne sais pas
+                    horizontal=True,
+                    key=key,
+                    label_visibility="collapsed",
+                )
+                answers[key] = SCALE_VALUES[val]
                 q_num += 1
 
+    st.divider()
     free_text = st.text_area(
         "💬 Commentaire libre (optionnel)",
         placeholder="Partagez vos remarques ou suggestions…",
@@ -82,32 +167,89 @@ with st.form("survey_form"):
 
     submitted = st.form_submit_button("✅ Soumettre mes réponses", use_container_width=True)
 
+# ---------------------------------------------------------------------------
+# On submit — compute averages (excluding 0) and persist
+# ---------------------------------------------------------------------------
 if submitted:
     from db.database import get_session
     from db.models import SurveyResponse
-    import numpy as np
 
-    def pil_avg(*keys): return float(np.mean([answers[k] for k in keys]))
+    def _pil_avg(*keys: str) -> float | None:
+        """Average of non-zero answers; None if all are 0 (Je ne sais pas)."""
+        vals = [answers[k] for k in keys if answers.get(k, 0) != 0]
+        return float(np.mean(vals)) if vals else None
+
+    # Map question numbers to DB columns
+    # Pillar 1: q1–q6   (Recrutement)
+    # Pillar 2: q7–q10  (Compétences)
+    # Pillar 3: q11–q14 (Performance)
+    # Pillar 4: q15–q18 (Rémunération)
+    # Pillar 5: q19–q24 (QVT)
+    # Pillar 6: q25–q29 (Droit)
+    # Pillar 7: q30–q33 (Transverses)
 
     response = SurveyResponse(
         response_id=str(uuid.uuid4()),
         user_id=user["user_id"],
         firm_id=user["firm_id"] or "00000000-0000-0000-0000-000000000000",
         timestamp=datetime.utcnow(),
-        recrutement_q1=answers["q1"], recrutement_q2=answers["q2"], recrutement_q3=answers["q3"],
-        competences_q4=answers["q4"], competences_q5=answers["q5"], competences_q6=answers["q6"],
-        performance_q7=answers["q7"], performance_q8=answers["q8"], performance_q9=answers["q9"],
-        remuneration_q10=answers["q10"], remuneration_q11=answers["q11"], remuneration_q12=answers["q12"],
-        qvt_q13=answers["q13"], qvt_q14=answers["q14"], qvt_q15=answers["q15"],
-        droit_q16=answers["q16"], droit_q17=answers["q17"], droit_q18=answers["q18"],
-        transverse_q19=answers["q19"], transverse_q20=answers["q20"], transverse_q21=answers["q21"],
-        recrutement_avg=pil_avg("q1","q2","q3"),
-        competences_avg=pil_avg("q4","q5","q6"),
-        performance_avg=pil_avg("q7","q8","q9"),
-        remuneration_avg=pil_avg("q10","q11","q12"),
-        qvt_avg=pil_avg("q13","q14","q15"),
-        droit_avg=pil_avg("q16","q17","q18"),
-        transverse_avg=pil_avg("q19","q20","q21"),
+
+        # Pillar 1 — Recrutement
+        recrutement_q1=answers["q1"],
+        recrutement_q2=answers["q2"],
+        recrutement_q3=answers["q3"],
+        recrutement_q4=answers["q4"],
+        recrutement_q5=answers["q5"],
+        recrutement_q6=answers["q6"],
+
+        # Pillar 2 — Compétences
+        competences_q7=answers["q7"],
+        competences_q8=answers["q8"],
+        competences_q9=answers["q9"],
+        competences_q10=answers["q10"],
+
+        # Pillar 3 — Performance
+        performance_q11=answers["q11"],
+        performance_q12=answers["q12"],
+        performance_q13=answers["q13"],
+        performance_q14=answers["q14"],
+
+        # Pillar 4 — Rémunération
+        remuneration_q15=answers["q15"],
+        remuneration_q16=answers["q16"],
+        remuneration_q17=answers["q17"],
+        remuneration_q18=answers["q18"],
+
+        # Pillar 5 — QVT
+        qvt_q19=answers["q19"],
+        qvt_q20=answers["q20"],
+        qvt_q21=answers["q21"],
+        qvt_q22=answers["q22"],
+        qvt_q23=answers["q23"],
+        qvt_q24=answers["q24"],
+
+        # Pillar 6 — Droit
+        droit_q25=answers["q25"],
+        droit_q26=answers["q26"],
+        droit_q27=answers["q27"],
+        droit_q28=answers["q28"],
+        droit_q29=answers["q29"],
+
+        # Pillar 7 — Transverses
+        transverse_q30=answers["q30"],
+        transverse_q31=answers["q31"],
+        transverse_q32=answers["q32"],
+        transverse_q33=answers["q33"],
+
+        # Averages (exclude Je ne sais pas = 0)
+        recrutement_avg=_pil_avg("q1","q2","q3","q4","q5","q6"),
+        competences_avg=_pil_avg("q7","q8","q9","q10"),
+        performance_avg=_pil_avg("q11","q12","q13","q14"),
+        remuneration_avg=_pil_avg("q15","q16","q17","q18"),
+        qvt_avg=_pil_avg("q19","q20","q21","q22","q23","q24"),
+        droit_avg=_pil_avg("q25","q26","q27","q28","q29"),
+        transverse_avg=_pil_avg("q30","q31","q32","q33"),
+
         free_text_feedback=free_text or None,
     )
 

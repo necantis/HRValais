@@ -46,14 +46,14 @@ def _load_uploads(firm_id: str) -> pd.DataFrame:
             .limit(10)
             .all()
         )
-    if not rows:
-        return pd.DataFrame()
-    return pd.DataFrame([{
-        "Fichier": r.filename,
-        "Date import": r.uploaded_at.strftime("%Y-%m-%d %H:%M"),
-        "Lignes": r.row_count,
-        "ID": r.upload_id[:8] + "…",
-    } for r in rows])
+        if not rows:
+            return pd.DataFrame()
+        return pd.DataFrame([{
+            "Fichier": r.filename,
+            "Date import": r.uploaded_at.strftime("%Y-%m-%d %H:%M"),
+            "Lignes": r.row_count,
+            "ID": r.upload_id[:8] + "…",
+        } for r in rows])
 
 history_df = _load_uploads(user["firm_id"])
 if not history_df.empty:

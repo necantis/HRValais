@@ -100,9 +100,7 @@ def _load_ofs_turnover() -> float:
     """Return average OFS turnover rate as baseline."""
     with get_session() as session:
         rows = session.query(OFSMacroData).filter(OFSMacroData.turnover_rate.isnot(None)).all()
-    if not rows:
-        return 0.12
-    rates = [r.turnover_rate for r in rows if r.turnover_rate]
+        rates = [r.turnover_rate for r in rows if r.turnover_rate]
     return float(np.mean(rates)) if rates else 0.12
 
 df = _load_longitudinal(user["firm_id"])

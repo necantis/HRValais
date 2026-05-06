@@ -165,13 +165,15 @@ st.subheader("📋 Données OFS globales")
 def _load_ofs_full() -> pd.DataFrame:
     with get_session() as session:
         rows = session.query(OFSMacroData).all()
-    return pd.DataFrame([{
-        "Source": r.source_file, "Secteur": r.industry_domain,
-        "Position": r.professional_position, "Âge": r.age_bracket,
-        "Genre": r.gender, "Année": r.year,
-        "Salaire médian (CHF)": r.gross_monthly_median_wage,
-        "Taux turnover": r.turnover_rate,
-    } for r in rows]) if rows else pd.DataFrame()
+        if not rows:
+            return pd.DataFrame()
+        return pd.DataFrame([{
+            "Source": r.source_file, "Secteur": r.industry_domain,
+            "Position": r.professional_position, "Âge": r.age_bracket,
+            "Genre": r.gender, "Année": r.year,
+            "Salaire médian (CHF)": r.gross_monthly_median_wage,
+            "Taux turnover": r.turnover_rate,
+        } for r in rows])
 
 ofs_full = _load_ofs_full()
 if not ofs_full.empty:
@@ -194,12 +196,12 @@ def _load_users() -> pd.DataFrame:
     with get_session() as session:
         users = session.query(User).all()
         firms = {f.firm_id: f.name for f in session.query(Firm).all()}
-    return pd.DataFrame([{
-        "Utilisateur": u.username,
-        "Nom": u.display_name,
-        "Rôle": u.role,
-        "Entreprise": firms.get(u.firm_id, "—"),
-    } for u in users])
+        return pd.DataFrame([{
+            "Utilisateur": u.username,
+            "Nom": u.display_name,
+            "Rôle": u.role,
+            "Entreprise": firms.get(u.firm_id, "—"),
+        } for u in users])
 
 users_df = _load_users()
 st.dataframe(users_df, use_container_width=True)

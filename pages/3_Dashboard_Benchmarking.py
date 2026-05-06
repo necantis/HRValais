@@ -31,18 +31,18 @@ st.caption("Données: Office Fédéral de la Statistique (OFS), Suisse")
 def _load_ofs() -> pd.DataFrame:
     with get_session() as session:
         rows = session.query(OFSMacroData).all()
-    if not rows:
-        return pd.DataFrame()
-    return pd.DataFrame([{
-        "source_file": r.source_file,
-        "industry_domain": r.industry_domain,
-        "professional_position": r.professional_position,
-        "age_bracket": r.age_bracket,
-        "gender": r.gender,
-        "year": r.year,
-        "gross_monthly_median_wage": r.gross_monthly_median_wage,
-        "turnover_rate": r.turnover_rate,
-    } for r in rows])
+        if not rows:
+            return pd.DataFrame()
+        return pd.DataFrame([{
+            "source_file": r.source_file,
+            "industry_domain": r.industry_domain,
+            "professional_position": r.professional_position,
+            "age_bracket": r.age_bracket,
+            "gender": r.gender,
+            "year": r.year,
+            "gross_monthly_median_wage": r.gross_monthly_median_wage,
+            "turnover_rate": r.turnover_rate,
+        } for r in rows])
 
 ofs_df = _load_ofs()
 

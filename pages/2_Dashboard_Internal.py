@@ -6,17 +6,16 @@ Access: hr_manager only.
 
 import sys
 from pathlib import Path
-import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import plotly.express as px
 import streamlit as st
 
 from utils.auth import require_role, get_current_user
-from utils.kanon import kanonymize
+from utils.pdf_generator import SURVEY_STRUCTURE, URL_MAPPING
 from db.database import get_session
 from db.models import SurveyResponse
 
@@ -24,38 +23,44 @@ require_role("hr_manager")
 user = get_current_user()
 
 st.title("📊 Tableau de bord interne")
-st.caption(f"Données agrégées pour **{user['firm_name']}** — k-anonymisées (k ≥ 5)")
+st.caption(f"Données agrégées pour **{user['firm_name']}**")
 
 # ---------------------------------------------------------------------------
 # Load data for this firm
 # ---------------------------------------------------------------------------
-PILLARS = ["recrutement_avg", "competences_avg", "performance_avg",
-           "remuneration_avg", "qvt_avg", "droit_avg", "transverse_avg"]
-PILLAR_LABELS = ["Recrutement", "Compétences", "Performance",
-                 "Rémunération", "QVT", "Droit", "Transverse"]
+PILLARS = [
+    "recrutement_avg", "competences_avg", "performance_avg",
+    "remuneration_avg", "qvt_avg", "droit_avg", "transverse_avg"
+]
+PILLAR_LABELS = [
+    "Recrutement", "Gestion des compétences", "Évaluation & Performance",
+    "Rémunération", "Qualité de vie au travail (QVT)", "Droit du travail", "Thématiques transverses"
+]
+
+# Get all individual question columns
+Q_COLS = [
+    "recrutement_q1", "recrutement_q2", "recrutement_q3", "recrutement_q4", "recrutement_q5", "recrutement_q6",
+    "competences_q7", "competences_q8", "competences_q9", "competences_q10",
+    "performance_q11", "performance_q12", "performance_q13", "performance_q14",
+    "remuneration_q15", "remuneration_q16", "remuneration_q17", "remuneration_q18",
+    "qvt_q19", "qvt_q20", "qvt_q21", "qvt_q22", "qvt_q23", "qvt_q24",
+    "droit_q25", "droit_q26", "droit_q27", "droit_q28", "droit_q29",
+    "transverse_q30", "transverse_q31", "transverse_q32", "transverse_q33"
+]
 
 @st.cache_data(ttl=60, show_spinner="Chargement des données…")
 def _load_firm_data(firm_id: str) -> pd.DataFrame:
     with get_session() as session:
+        entities = [getattr(SurveyResponse, p) for p in PILLARS] + [getattr(SurveyResponse, q) for q in Q_COLS]
         rows = (
             session.query(SurveyResponse)
             .filter_by(firm_id=firm_id)
-            .with_entities(
-                SurveyResponse.timestamp,
-                SurveyResponse.month_index,
-                SurveyResponse.age,
-                SurveyResponse.position,
-                SurveyResponse.gender,
-                SurveyResponse.engagement_state,
-                *[getattr(SurveyResponse, p) for p in PILLARS],
-            )
+            .with_entities(*entities)
             .all()
         )
     if not rows:
         return pd.DataFrame()
-    return pd.DataFrame(rows, columns=[
-        "timestamp", "month_index", "age", "position", "gender", "engagement_state"
-    ] + PILLARS)
+    return pd.DataFrame(rows, columns=PILLARS + Q_COLS)
 
 df = _load_firm_data(user["firm_id"])
 
@@ -63,26 +68,13 @@ if df.empty:
     st.warning("⚠️ Aucune donnée disponible pour cette entreprise.")
     st.stop()
 
-total_responses = len(df)
-K = 5
+# Filter out 0s (Je ne sais pas) by replacing with NaN
+df_filtered = df.replace(0, np.nan)
 
 # ---------------------------------------------------------------------------
-# KPIs
+# Radar chart (Spider Chart)
 # ---------------------------------------------------------------------------
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Réponses totales", total_responses)
-col2.metric("Score moyen global", f"{df[PILLARS].mean().mean():.2f} / 5")
-attrition_pct = (df["engagement_state"] == "Resigned").mean() * 100
-col3.metric("Taux Resigned", f"{attrition_pct:.1f}%")
-highly_engaged_pct = (df["engagement_state"] == "Highly Engaged").mean() * 100
-col4.metric("Très engagés", f"{highly_engaged_pct:.1f}%")
-
-st.divider()
-
-# ---------------------------------------------------------------------------
-# Radar chart
-# ---------------------------------------------------------------------------
-pillar_means = df[PILLARS].mean().values
+pillar_means = df_filtered[PILLARS].mean().values
 
 fig_radar = go.Figure()
 fig_radar.add_trace(go.Scatterpolar(
@@ -94,105 +86,53 @@ fig_radar.add_trace(go.Scatterpolar(
     fillcolor="rgba(79,142,247,0.2)",
 ))
 fig_radar.update_layout(
-    polar=dict(radialaxis=dict(visible=True, range=[0, 5])),
-    title="Scores moyens par pilier (k-anonymisé)",
+    polar=dict(radialaxis=dict(visible=True, range=[1, 4])),
+    title="Scores moyens par dimension",
     template="plotly_dark",
     height=420,
 )
 st.plotly_chart(fig_radar, use_container_width=True)
 
 # ---------------------------------------------------------------------------
-# Pillar trend over time
+# Diagnostic Engine
 # ---------------------------------------------------------------------------
-st.subheader("📈 Évolution temporelle par pilier")
+st.header("Moteur de diagnostic")
 
-if "month_index" in df.columns and df["month_index"].notna().any():
-    trend_df = (
-        df.dropna(subset=["month_index"])
-        .groupby("month_index")[PILLARS]
-        .mean()
-        .reset_index()
-    )
-    # Only show months with ≥ k responses (k-anon)
-    counts = df.dropna(subset=["month_index"]).groupby("month_index").size()
-    valid_months = counts[counts >= K].index
-    trend_df = trend_df[trend_df["month_index"].isin(valid_months)]
+# Create a mapping for dimension base URLs
+def get_base_url(dimension_name):
+    # Example transformation: 'Évaluation & Performance' -> 'evaluation-performance'
+    import re
+    import unicodedata
+    name = dimension_name.lower()
+    name = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode("utf-8")
+    name = re.sub(r'[^a-z0-9\s-]', '', name)
+    name = re.sub(r'[\s]+', '-', name.strip())
+    # Handle specific overrides if needed based on URL structure
+    if "qvt" in name:
+        name = "qualite-de-vie-au-travail"
+    elif "evaluation" in name:
+        name = "evaluation-et-performance"
+    return f"https://www.hr-valais.ch/fiches-rh-pme/francais/{name}"
 
-    if trend_df.empty:
-        st.info(f"Pas assez de données par mois (k={K}) pour afficher la tendance.")
-    else:
-        fig_trend = px.line(
-            trend_df.melt(id_vars="month_index", value_vars=PILLARS,
-                          var_name="Pilier", value_name="Score moyen"),
-            x="month_index", y="Score moyen", color="Pilier",
-            labels={"month_index": "Mois"},
-            title="Tendance temporelle des scores (groupes ≥ 5 réponses)",
-            template="plotly_dark",
-        )
-        # Rename legend
-        label_map = dict(zip(PILLARS, PILLAR_LABELS))
-        fig_trend.for_each_trace(lambda t: t.update(name=label_map.get(t.name, t.name)))
-        st.plotly_chart(fig_trend, use_container_width=True)
-else:
-    st.info("Données temporelles non disponibles pour vos réponses directes.")
+for i, pillar_name in enumerate(PILLAR_LABELS):
+    score = pillar_means[i]
+    if pd.notna(score) and score < 3.0:
+        base_url = get_base_url(pillar_name)
+        st.warning(f"**Attention**: La dimension **{pillar_name}** a un score moyen faible ({score:.2f}). [Consulter le guide de base]({base_url})")
 
-# ---------------------------------------------------------------------------
-# Breakdown by position (k-anon)
-# ---------------------------------------------------------------------------
-st.subheader("👥 Scores par position professionnelle (k-anonymisés)")
-if df["position"].notna().any():
-    anon_pos = kanonymize(
-        df.dropna(subset=["position"]),
-        group_cols=["position"],
-        value_cols=PILLARS,
-        k=K,
-    )
-    if anon_pos.empty:
-        st.info(f"Groupes trop petits (N < {K}) — données supprimées pour confidentialité.")
-    else:
-        anon_pos = anon_pos.rename(columns=dict(zip(PILLARS, PILLAR_LABELS)))
-        st.dataframe(
-            anon_pos[["position", "_count"] + PILLAR_LABELS].rename(
-                columns={"_count": "N (réponses)"}
-            ).round(2),
-            use_container_width=True,
-        )
+st.subheader("Feedback spécifique")
 
-# ---------------------------------------------------------------------------
-# Breakdown by engagement state (k-anon)
-# ---------------------------------------------------------------------------
-st.subheader("🔗 Répartition par état d'engagement")
-if df["engagement_state"].notna().any():
-    state_counts = df["engagement_state"].value_counts().reset_index()
-    state_counts.columns = ["État", "Nombre"]
-    # Suppress states with N < k
-    state_counts = state_counts[state_counts["Nombre"] >= K]
-    if state_counts.empty:
-        st.info("Données insuffisantes (k-anonymisation).")
-    else:
-        fig_bar = px.bar(
-            state_counts, x="État", y="Nombre",
-            color="État",
-            color_discrete_map={
-                "Highly Engaged": "#22C55E",
-                "Content": "#4F8EF7",
-                "Passively Looking": "#F59E0B",
-                "Resigned": "#EF4444",
-            },
-            template="plotly_dark",
-            title="Répartition des états d'engagement (groupes ≥ 5)",
-        )
-        st.plotly_chart(fig_bar, use_container_width=True)
+q_idx = 0
+for i, (dimension_name, questions) in enumerate(SURVEY_STRUCTURE):
+    for q_text in questions:
+        col_name = Q_COLS[q_idx]
+        q_avg = df_filtered[col_name].mean()
+        
+        if pd.notna(q_avg) and q_avg < 3.0:
+            fiche_url = URL_MAPPING.get(q_text, "#")
+            st.error(f"**Score critique ({q_avg:.2f})** : {q_text}\n\n👉 [Fiche pratique recommandée]({fiche_url})")
+        
+        q_idx += 1
 
-# ---------------------------------------------------------------------------
-# Download
-# ---------------------------------------------------------------------------
 st.divider()
-anon_download = kanonymize(df, group_cols=["month_index", "position", "gender"],
-                            value_cols=PILLARS, k=K)
-st.download_button(
-    "⬇️ Télécharger les données agrégées (CSV)",
-    data=anon_download.to_csv(index=False).encode("utf-8"),
-    file_name=f"hrvalais_aggregated_{user['firm_id'][:8]}.csv",
-    mime="text/csv",
-)
+st.caption("Fin du rapport de diagnostic.")
