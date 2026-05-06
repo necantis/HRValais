@@ -23,6 +23,25 @@ require_role("employee", "hr_manager", "admin")
 user = get_current_user()
 
 # ---------------------------------------------------------------------------
+# Submission limit check
+# ---------------------------------------------------------------------------
+from sqlalchemy import extract
+from db.database import get_session
+from db.models import SurveyResponse
+
+current_year = datetime.utcnow().year
+with get_session() as session:
+    submissions_this_year = session.query(SurveyResponse).filter(
+        SurveyResponse.user_id == user["user_id"],
+        extract('year', SurveyResponse.timestamp) == current_year
+    ).count()
+
+max_surveys = user.get("max_surveys_per_year", 1)
+if submissions_this_year >= max_surveys:
+    st.warning(f"Vous avez déjà soumis {submissions_this_year} sondage(s) cette année. La limite est de {max_surveys}.")
+    st.stop()
+
+# ---------------------------------------------------------------------------
 # Page header
 # ---------------------------------------------------------------------------
 st.title("📋 Sondage HR Valais — Fiches pratiques")
@@ -138,11 +157,9 @@ with st.form("survey_form"):
                 key = f"q{q_num}"
                 fiche_url = URL_MAPPING.get(q_text, "#")
 
-                # Question label + fiche link
+                # Question label
                 st.markdown(
-                    f'<p class="q-label">{q_num}. {q_text}</p>'
-                    f'<a class="fiche-link" href="{fiche_url}" target="_blank">'
-                    f'📎 Fiche pratique HR Valais</a>',
+                    f'<p class="q-label">{q_num}. {q_text}</p>',
                     unsafe_allow_html=True,
                 )
 

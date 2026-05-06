@@ -44,6 +44,7 @@ class User(Base):
     role = Column(String, nullable=False)          # 'employee' | 'hr_manager' | 'admin'
     hashed_password = Column(String, nullable=False)
     display_name = Column(String, nullable=True)
+    max_surveys_per_year = Column(Integer, default=1)
 
     firm = relationship("Firm", back_populates="users")
     survey_responses = relationship("SurveyResponse", back_populates="user")

@@ -2,15 +2,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Secure HR App", layout="wide")
 
-# Hardcoded static dictionary for RBAC to save time
-USERS = {
-    "Employee1_firmA": {"password": "password123", "role": "Employee", "name": "Alice (Firm A)", "firm_name": "Alpina Services SA"},
-    "Employee1_firmB": {"password": "password123", "role": "Employee", "name": "Bob (Firm B)", "firm_name": "Rhône Industrie Sàrl"},
-    "Manager1_firmA": {"password": "password123", "role": "HR Manager", "name": "Chloé (Firm A)", "firm_name": "Alpina Services SA"},
-    "Manager1_firmB": {"password": "password123", "role": "HR Manager", "name": "David (Firm B)", "firm_name": "Rhône Industrie Sàrl"},
-    "admin1": {"password": "password123", "role": "Admin", "name": "Charlie Admin", "firm_name": "HR Valais (Platform)"}
-}
-
 def login():
     st.title("Login")
     
@@ -27,63 +18,23 @@ def login():
         submitted = st.form_submit_button("Login")
         
         if submitted:
-            if username in USERS and USERS[username]["password"] == password:
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent))
+            from utils.auth import login as auth_login
+            
+            success, msg = auth_login(username, password)
+            if success:
                 st.session_state["authenticated"] = True
-                role = USERS[username]["role"]
-                st.session_state["role"] = role
-                st.session_state["name"] = USERS[username]["name"]
-                
-                # Create a mock hrv_user for compatibility with the old dashboards
-                mapped_role = "hr_manager" if role == "HR Manager" else role.lower()
-                target_firm_name = USERS[username].get("firm_name")
-                # Fetch the real firm ID and ensure the user exists in the prototype DB
-                real_firm_id = "00000000-0000-0000-0000-000000000001"
-                real_user_id = "00000000-0000-0000-0000-000000000000"
-                
-                try:
-                    import sys
-                    from pathlib import Path
-                    sys.path.insert(0, str(Path(__file__).parent))
-                    from db.database import get_session
-                    from db.models import Firm, User
-                    import uuid
-                    
-                    with get_session() as session:
-                        # 1. Get real firm_id
-                        firm = session.query(Firm).filter_by(name=target_firm_name).first()
-                        if firm:
-                            real_firm_id = firm.firm_id
-                            
-                        # 2. Get or create real user_id to satisfy Foreign Key constraints
-                        user_db = session.query(User).filter_by(username=username).first()
-                        if not user_db:
-                            real_user_id = str(uuid.uuid4())
-                            user_db = User(
-                                user_id=real_user_id,
-                                firm_id=real_firm_id,
-                                username=username,
-                                role=mapped_role,
-                                hashed_password="mock",
-                                display_name=USERS[username]["name"]
-                            )
-                            session.add(user_db)
-                            session.commit()
-                        else:
-                            real_user_id = user_db.user_id
-                except Exception as e:
-                    print(f"Error initializing user: {e}")
-
-                st.session_state["hrv_user"] = {
-                    "user_id": real_user_id,
-                    "username": username,
-                    "display_name": USERS[username]["name"],
-                    "role": mapped_role,
-                    "firm_id": real_firm_id,
-                    "firm_name": target_firm_name
-                }
+                user = st.session_state["hrv_user"]
+                # map hr_manager -> HR Manager for compatibility with sidebar text/routing
+                raw_role = user["role"]
+                mapped_role = "HR Manager" if raw_role == "hr_manager" else raw_role.capitalize()
+                st.session_state["role"] = mapped_role
+                st.session_state["name"] = user["display_name"]
                 st.rerun()
             else:
-                st.error("Invalid username or password")
+                st.error(msg)
 
 def logout():
     st.session_state.clear()

@@ -73,6 +73,7 @@ def login(username: str, password: str) -> tuple[bool, str]:
             "role": user.role,
             "firm_id": user.firm_id,
             "firm_name": firm_name,
+            "max_surveys_per_year": getattr(user, "max_surveys_per_year", 1),
         }
     return True, ""
 
