@@ -1,22 +1,34 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+import sys
+from pathlib import Path
+
+# Load the full survey structure
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils.pdf_generator import SURVEY_STRUCTURE
 
 st.title("Employee Survey")
 
-@st.cache_resource(check_same_thread=False)
+# Flatten questions to know the total count
+ALL_QUESTIONS = []
+for pillar, qs in SURVEY_STRUCTURE:
+    ALL_QUESTIONS.extend(qs)
+
+@st.cache_resource
 def get_db_connection():
     conn = sqlite3.connect('hr_valais_live.db', check_same_thread=False)
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA synchronous=NORMAL;")
     
-    # Initialize table if it doesn't exist
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS survey_responses (
+    # We create a new table 'survey_responses_full' to accommodate all 33 questions, 
+    # preventing schema issues with the old table.
+    columns = ", ".join([f"q{i+1}_rating INTEGER" for i in range(len(ALL_QUESTIONS))])
+    conn.execute(f'''
+        CREATE TABLE IF NOT EXISTS survey_responses_full (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_name TEXT,
-            q1_rating INTEGER,
-            q2_rating INTEGER,
+            {columns},
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -25,42 +37,72 @@ def get_db_connection():
 
 conn = get_db_connection()
 
-st.write("Please fill out the following survey. Scale: 1 (Poor) to 4 (Excellent). Select 0 for 'Je ne sais pas'.")
+st.write("Please fill out the following survey. Scale: 1 (Faible) to 4 (Optimal). Select 0 for 'Je ne sais pas'.")
 
 with st.form("survey_form", clear_on_submit=True):
-    q1 = st.radio("How satisfied are you with the company culture?", options=[0, 1, 2, 3, 4], index=0, format_func=lambda x: "0 (Je ne sais pas)" if x == 0 else str(x))
-    q2 = st.radio("How would you rate your work-life balance?", options=[0, 1, 2, 3, 4], index=0, format_func=lambda x: "0 (Je ne sais pas)" if x == 0 else str(x))
+    responses = {}
     
-    submitted = st.form_submit_button("Submit Survey")
+    q_index = 1
+    for pillar, questions in SURVEY_STRUCTURE:
+        st.subheader(pillar)
+        for q in questions:
+            responses[f"q{q_index}"] = st.radio(
+                f"{q_index}. {q}", 
+                options=[0, 1, 2, 3, 4], 
+                index=0, 
+                format_func=lambda x: "0 (Je ne sais pas)" if x == 0 else str(x),
+                key=f"radio_q{q_index}",
+                horizontal=True
+            )
+            q_index += 1
+            
+    submitted = st.form_submit_button("Submit Survey", use_container_width=True)
     
     if submitted:
-        # Batch database write inside form submission using parameterized query
         cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO survey_responses (user_name, q1_rating, q2_rating) VALUES (?, ?, ?)", 
-            (st.session_state.get('name', 'Anonymous'), q1, q2)
-        )
+        
+        # Prepare dynamic INSERT statement
+        cols = ["user_name"] + [f"q{i+1}_rating" for i in range(len(ALL_QUESTIONS))]
+        placeholders = ", ".join(["?"] * len(cols))
+        
+        values = [st.session_state.get('name', 'Anonymous')] + [responses[f"q{i+1}"] for i in range(len(ALL_QUESTIONS))]
+        
+        cursor.execute(f"INSERT INTO survey_responses_full ({', '.join(cols)}) VALUES ({placeholders})", values)
         conn.commit()
-        st.success("Survey submitted successfully! Thank you.")
+        st.success("🎉 Survey submitted successfully! Thank you.")
 
 st.divider()
 st.subheader("Live Survey Statistics")
 
-# Read data excluding 0 from average calculations in SQL
-# We use NULLIF(column, 0) so that 0 becomes NULL and is ignored by AVG()
-stats_query = """
+# Dynamically generate the averages query
+avg_queries = ",\n        ".join([f"AVG(NULLIF(q{i+1}_rating, 0)) as avg_q{i+1}" for i in range(len(ALL_QUESTIONS))])
+stats_query = f"""
     SELECT 
         COUNT(*) as total_responses,
-        AVG(NULLIF(q1_rating, 0)) as avg_q1,
-        AVG(NULLIF(q2_rating, 0)) as avg_q2
-    FROM survey_responses
+        {avg_queries}
+    FROM survey_responses_full
 """
 
 try:
     df_stats = pd.read_sql_query(stats_query, conn)
-    st.write(f"Total responses: {df_stats['total_responses'][0]}")
-    st.write(f"Average Q1 Rating: {df_stats['avg_q1'][0]:.2f}" if pd.notna(df_stats['avg_q1'][0]) else "Average Q1 Rating: N/A")
-    st.write(f"Average Q2 Rating: {df_stats['avg_q2'][0]:.2f}" if pd.notna(df_stats['avg_q2'][0]) else "Average Q2 Rating: N/A")
+    st.write(f"**Total responses:** {df_stats['total_responses'][0]}")
+    
+    # Render averages in an expander
+    with st.expander("📊 View Average Scores per Question"):
+        avg_data = []
+        q_idx = 1
+        for pillar, questions in SURVEY_STRUCTURE:
+            for q in questions:
+                avg_val = df_stats[f'avg_q{q_idx}'][0]
+                avg_data.append({
+                    "Pillar": pillar,
+                    "Question": q,
+                    "Average Score": round(avg_val, 2) if pd.notna(avg_val) else None
+                })
+                q_idx += 1
+                
+        df_display = pd.DataFrame(avg_data)
+        st.dataframe(df_display, use_container_width=True)
+
 except Exception as e:
     st.error(f"Error fetching stats: {e}")
-

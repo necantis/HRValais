@@ -130,7 +130,7 @@ for i, (dimension_name, questions) in enumerate(SURVEY_STRUCTURE):
         
         if pd.notna(q_avg) and q_avg < 3.0:
             fiche_url = URL_MAPPING.get(q_text, "#")
-            st.error(f"**Score critique ({q_avg:.2f})** : {q_text}\n\n👉 [Fiche pratique recommandée]({fiche_url})")
+            st.error(f"**Score critique ({q_avg:.2f})** : {q_text}\n\n👉 **Fiche pratique recommandée** : {fiche_url}")
         
         q_idx += 1
 

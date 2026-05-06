@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from utils.auth import require_role, get_current_user
 from utils.pdf_generator import generate_survey_pdf, SURVEY_STRUCTURE, URL_MAPPING
 
-require_role("employee")
+require_role("employee", "hr_manager", "admin")
 user = get_current_user()
 
 # ---------------------------------------------------------------------------
