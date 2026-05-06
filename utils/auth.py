@@ -78,6 +78,35 @@ def login(username: str, password: str) -> tuple[bool, str]:
     return True, ""
 
 
+def auto_login(username: str) -> bool:
+    from db.database import get_session
+    from db.models import User, Firm
+
+    with get_session() as session:
+        user: Optional[User] = (
+            session.query(User).filter_by(username=username).first()
+        )
+        if user is None:
+            return False
+
+        firm_name = None
+        if user.firm_id:
+            firm = session.query(Firm).filter_by(firm_id=user.firm_id).first()
+            firm_name = firm.name if firm else None
+
+        st.session_state[_KEY_USER] = {
+            "user_id": user.user_id,
+            "username": user.username,
+            "display_name": user.display_name or user.username,
+            "role": user.role,
+            "firm_id": user.firm_id,
+            "firm_name": firm_name,
+            "max_surveys_per_year": getattr(user, "max_surveys_per_year", 1),
+        }
+    return True
+
+
+
 def logout() -> None:
     st.session_state.pop(_KEY_USER, None)
 

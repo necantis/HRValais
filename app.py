@@ -32,16 +32,36 @@ def login():
                 mapped_role = "HR Manager" if raw_role == "hr_manager" else raw_role.capitalize()
                 st.session_state["role"] = mapped_role
                 st.session_state["name"] = user["display_name"]
+                st.query_params["session_user"] = username
                 st.rerun()
             else:
                 st.error(msg)
 
 def logout():
     st.session_state.clear()
+    if "session_user" in st.query_params:
+        del st.query_params["session_user"]
     st.rerun()
 
 if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
+    if "session_user" in st.query_params:
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from utils.auth import auto_login
+        
+        username = st.query_params["session_user"]
+        if auto_login(username):
+            st.session_state["authenticated"] = True
+            user = st.session_state["hrv_user"]
+            raw_role = user["role"]
+            st.session_state["role"] = "HR Manager" if raw_role == "hr_manager" else raw_role.capitalize()
+            st.session_state["name"] = user["display_name"]
+        else:
+            st.session_state["authenticated"] = False
+            del st.query_params["session_user"]
+    else:
+        st.session_state["authenticated"] = False
 
 if not st.session_state["authenticated"]:
     login()

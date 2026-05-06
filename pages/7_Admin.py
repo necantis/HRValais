@@ -107,6 +107,7 @@ with st.expander("🔢 Modifier les limites de sondages"):
                     u_id = user_map_limits[target_u]
                     u_db = session.query(User).get(u_id)
                     u_db.max_surveys_per_year = new_limit
+                _load_users.clear()
                 st.success("Limite mise à jour.")
                 st.rerun()
         else:
