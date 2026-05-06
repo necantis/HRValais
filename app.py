@@ -67,7 +67,7 @@ else:
     if role == "Employee":
         pg = st.navigation([survey_page])
     elif role == "HR Manager":
-        pg = st.navigation([survey_page, demo_page, internal_dashboard, benchmarking, mixed_models, timeseries, upload_page])
+        pg = st.navigation([survey_page, demo_page, internal_dashboard, benchmarking, mixed_models, timeseries, upload_page, admin_page])
     elif role == "Admin":
         pg = st.navigation([survey_page, demo_page, internal_dashboard, benchmarking, mixed_models, timeseries, upload_page, admin_page])
     else:
