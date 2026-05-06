@@ -62,8 +62,8 @@ DEMO_USERS = [
         "firm_key": "firm_b",
     },
     {
-        "username": "admin1",
-        "password": "password123",
+        "username": "admin",
+        "password": "admin",
         "role": "admin",
         "display_name": "Charlie Admin",
         "firm_key": "firm_c",

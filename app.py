@@ -9,7 +9,7 @@ def login():
     **Test Accounts:**
     - **Firm A:** `Employee1_firmA` / `password123` | `Manager1_firmA` / `password123`
     - **Firm B:** `Employee1_firmB` / `password123` | `Manager1_firmB` / `password123`
-    - **Admin:** `admin1` / `password123`
+    - **Admin:** `admin` / `admin`
     """)
 
     with st.form("login_form"):
