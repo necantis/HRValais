@@ -164,15 +164,25 @@ with tab1:
     st.subheader("👤 Utilisateurs enregistrés")
     users_df = _load_users(None if is_admin else user["firm_id"])
 
+    with get_session() as session:
+        firm_map_inv = {f.name: f.firm_id for f in session.query(Firm).all()}
+        firm_map_inv["—"] = None
+        firm_names = list(f.name for f in session.query(Firm).all())
+
+    disabled_cols = [] if is_admin else ["Rôle", "Entreprise"]
+
     with st.form("edit_users_form"):
-        st.write("Modifiez le nom d'utilisateur ou tapez un nouveau mot de passe ci-dessous :")
+        st.write("Modifiez les informations utilisateur ci-dessous :")
         edited_df = st.data_editor(
             users_df,
             column_config={
                 "user_id": None,
+                "Rôle": st.column_config.SelectboxColumn("Rôle", options=["admin", "hr_manager", "employee"]),
+                "Entreprise": st.column_config.SelectboxColumn("Entreprise", options=["—"] + firm_names),
+                "Limite/An": st.column_config.NumberColumn("Limite/An", min_value=1, step=1),
                 "Nouveau mot de passe": st.column_config.TextColumn("Nouveau mot de passe (laisser vide sinon)")
             },
-            disabled=["Nom", "Rôle", "Entreprise", "Limite/An"],
+            disabled=disabled_cols,
             use_container_width=True,
             hide_index=True
         )
@@ -183,19 +193,35 @@ with tab1:
                 for i, row in edited_df.iterrows():
                     uid = row["user_id"]
                     new_username = row["Utilisateur"]
+                    new_name = row["Nom"]
+                    new_role = row["Rôle"]
+                    new_firm = row["Entreprise"]
+                    new_limit = row["Limite/An"]
                     new_pw = row["Nouveau mot de passe"]
                     
                     orig_row = users_df.iloc[i]
                     orig_username = orig_row["Utilisateur"]
+                    orig_name = orig_row["Nom"]
+                    orig_role = orig_row["Rôle"]
+                    orig_firm = orig_row["Entreprise"]
+                    orig_limit = orig_row["Limite/An"]
                     
-                    if new_username != orig_username or new_pw.strip() != "":
+                    if (new_username != orig_username or 
+                        new_name != orig_name or 
+                        new_role != orig_role or 
+                        new_firm != orig_firm or 
+                        new_limit != orig_limit or 
+                        new_pw.strip() != ""):
+                        
                         u_db = session.query(User).get(uid)
-                        if new_username != orig_username:
-                            u_db.username = new_username
-                            changes_made = True
+                        u_db.username = new_username
+                        u_db.display_name = new_name
+                        u_db.role = new_role
+                        u_db.firm_id = firm_map_inv.get(new_firm)
+                        u_db.max_surveys_per_year = new_limit
                         if new_pw.strip() != "":
                             u_db.hashed_password = hash_password(new_pw.strip())
-                            changes_made = True
+                        changes_made = True
             
             if changes_made:
                 _load_users.clear()
