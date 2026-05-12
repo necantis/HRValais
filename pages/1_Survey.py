@@ -122,6 +122,13 @@ with st.expander("📄 Consulter les Fiches pratiques HR Valais (PDF)", expanded
     )
 
 st.divider()
+
+if "missing_questions" not in st.session_state:
+    st.session_state["missing_questions"] = []
+
+if st.session_state["missing_questions"]:
+    st.error(f"❌ Impossible de soumettre. Vous avez oublié de répondre à **{len(st.session_state['missing_questions'])}** question(s). Elles sont surlignées en rouge ci-dessous.")
+
 st.subheader("Répondez au sondage annuel")
 st.markdown(
     "Évaluez chaque affirmation sur une échelle de **1** (faible) à **4** (optimal). "
@@ -157,9 +164,12 @@ with st.form("survey_form"):
                 key = f"q{q_num}"
                 fiche_url = URL_MAPPING.get(q_text, "#")
 
+                is_missing = key in st.session_state["missing_questions"]
+                q_color = "#FC8181" if is_missing else "#E2E8F0"
+
                 # Question label
                 st.markdown(
-                    f'<p class="q-label">{q_num}. {q_text}</p>',
+                    f'<p class="q-label" style="color: {q_color}; font-weight: {"700" if is_missing else "500"};">{q_num}. {q_text}</p>',
                     unsafe_allow_html=True,
                 )
 
@@ -183,6 +193,9 @@ with st.form("survey_form"):
         max_chars=1000,
     )
 
+    if st.session_state["missing_questions"]:
+        st.error("⚠️ Il manque des réponses. Veuillez corriger les questions en rouge ci-dessus avant de soumettre.")
+
     submitted = st.form_submit_button("✅ Soumettre mes réponses", use_container_width=True)
 
 # ---------------------------------------------------------------------------
@@ -190,10 +203,12 @@ with st.form("survey_form"):
 # ---------------------------------------------------------------------------
 if submitted:
     # Validation: Ensure all 33 questions are answered
-    missing_questions = [str(i) for i in range(1, 34) if f"q{i}" not in answers]
-    if missing_questions:
-        st.error(f"❌ Vous avez oublié de répondre aux questions : **{', '.join(missing_questions)}**. Veuillez sélectionner une option pour chaque question.")
-        st.stop()
+    missing = [f"q{i}" for i in range(1, 34) if f"q{i}" not in answers]
+    if missing:
+        st.session_state["missing_questions"] = missing
+        st.rerun()
+    else:
+        st.session_state["missing_questions"] = []
         
     from db.database import get_session
     from db.models import SurveyResponse
