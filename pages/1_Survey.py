@@ -167,12 +167,13 @@ with st.form("survey_form"):
                 val = st.radio(
                     label=f"_{key}",        # hidden by label_visibility
                     options=SCALE_OPTIONS,
-                    index=0,               # default: 0 — Je ne sais pas
+                    index=None,            # Force user to explicitly choose
                     horizontal=True,
                     key=key,
                     label_visibility="collapsed",
                 )
-                answers[key] = SCALE_VALUES[val]
+                if val is not None:
+                    answers[key] = SCALE_VALUES[val]
                 q_num += 1
 
     st.divider()
@@ -188,6 +189,12 @@ with st.form("survey_form"):
 # On submit — compute averages (excluding 0) and persist
 # ---------------------------------------------------------------------------
 if submitted:
+    # Validation: Ensure all 33 questions are answered
+    missing_questions = [str(i) for i in range(1, 34) if f"q{i}" not in answers]
+    if missing_questions:
+        st.error(f"❌ Vous avez oublié de répondre aux questions : **{', '.join(missing_questions)}**. Veuillez sélectionner une option pour chaque question.")
+        st.stop()
+        
     from db.database import get_session
     from db.models import SurveyResponse
 
