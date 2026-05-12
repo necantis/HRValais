@@ -168,3 +168,13 @@ class MonthlyUpload(Base):
     raw_csv = Column(Text, nullable=True)   # Store raw CSV as text for auditability
 
     firm = relationship("Firm", back_populates="monthly_uploads")
+
+class ActivityLog(Base):
+    __tablename__ = "activity_logs"
+    id = Column(String, primary_key=True, default=_new_uuid)
+    user_id = Column(String, ForeignKey("users.user_id"), nullable=True)
+    firm_id = Column(String, ForeignKey("firms.firm_id"), nullable=True)
+    action_type = Column(String, nullable=False)
+    action_value = Column(String, nullable=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+

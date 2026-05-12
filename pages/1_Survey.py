@@ -135,6 +135,9 @@ st.markdown(
     "Choisissez **0 — Je ne sais pas** si vous ne pouvez pas évaluer l'affirmation."
 )
 
+if "survey_start_time" not in st.session_state:
+    st.session_state["survey_start_time"] = datetime.now()
+
 # ---------------------------------------------------------------------------
 # Scale definition
 # ---------------------------------------------------------------------------
@@ -294,6 +297,21 @@ if submitted:
 
     with get_session() as session:
         session.add(response)
+        
+        # Telemetry: survey_completion_time
+        if "survey_start_time" in st.session_state:
+            duration = (datetime.now() - st.session_state["survey_start_time"]).total_seconds()
+            from db.models import ActivityLog
+            session.add(ActivityLog(
+                id=str(uuid.uuid4()),
+                user_id=user["user_id"],
+                firm_id=user["firm_id"],
+                action_type="survey_completion_time",
+                action_value=str(duration),
+                timestamp=datetime.utcnow()
+            ))
+            del st.session_state["survey_start_time"]
+
         session.commit()
 
     st.success("🎉 Merci ! Vos réponses ont été enregistrées avec succès.")

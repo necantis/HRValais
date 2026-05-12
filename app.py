@@ -2,6 +2,29 @@ import streamlit as st
 
 st.set_page_config(page_title="Secure HR App", layout="wide")
 
+if "redirect_url" in st.query_params:
+    redirect_url = st.query_params["redirect_url"]
+    if "hrv_user" in st.session_state:
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent))
+        from db.database import get_session
+        from db.models import ActivityLog
+        import uuid
+        from datetime import datetime
+        with get_session() as session:
+            session.add(ActivityLog(
+                id=str(uuid.uuid4()),
+                user_id=st.session_state["hrv_user"]["user_id"],
+                firm_id=st.session_state["hrv_user"]["firm_id"],
+                action_type="link_click",
+                action_value=redirect_url,
+                timestamp=datetime.utcnow()
+            ))
+    
+    st.markdown(f'<meta http-equiv="refresh" content="0; url={redirect_url}">', unsafe_allow_html=True)
+    st.stop()
+
 def login():
     st.title("Login")
     

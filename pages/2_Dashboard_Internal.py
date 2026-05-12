@@ -24,6 +24,22 @@ require_role("hr_manager", "admin")
 user = get_current_user()
 is_admin = user["role"] == "admin"
 
+# Telemetry: dashboard_ping
+if not is_admin:
+    import uuid
+    from datetime import datetime
+    from db.models import ActivityLog
+    with get_session() as session:
+        session.add(ActivityLog(
+            id=str(uuid.uuid4()),
+            user_id=user["user_id"],
+            firm_id=user["firm_id"],
+            action_type="dashboard_ping",
+            action_value="loaded",
+            timestamp=datetime.utcnow()
+        ))
+        session.commit()
+
 # ---------------------------------------------------------------------------
 # Data Loading Constants
 # ---------------------------------------------------------------------------
@@ -197,6 +213,7 @@ st.header("Moteur de diagnostic")
 def get_base_url(dimension_name):
     import re
     import unicodedata
+    import urllib.parse
     name = dimension_name.lower()
     name = unicodedata.normalize('NFD', name).encode('ascii', 'ignore').decode("utf-8")
     name = re.sub(r'[^a-z0-9\s-]', '', name)
@@ -205,7 +222,8 @@ def get_base_url(dimension_name):
         name = "qualite-de-vie-au-travail"
     elif "evaluation" in name:
         name = "evaluation-et-performance"
-    return f"https://www.hr-valais.ch/fiches-rh-pme/francais/{name}"
+    url = f"https://www.hr-valais.ch/fiches-rh-pme/francais/{name}"
+    return f"/?redirect_url={urllib.parse.quote(url)}"
 
 for i, pillar_name in enumerate(PILLAR_LABELS):
     score = pillar_means_firm[i]
@@ -216,14 +234,19 @@ for i, pillar_name in enumerate(PILLAR_LABELS):
 st.subheader("Feedback spécifique")
 
 q_idx = 0
+import urllib.parse
 for i, (dimension_name, questions) in enumerate(SURVEY_STRUCTURE):
     for q_text in questions:
         col_name = Q_COLS[q_idx]
         q_avg = df_firm[col_name].mean()
         
         if pd.notna(q_avg) and q_avg < 3.0:
-            fiche_url = URL_MAPPING.get(q_text, "#")
-            st.error(f"**Score critique ({q_avg:.2f})** : {q_text}\n\n👉 **Fiche pratique recommandée** : {fiche_url}")
+            raw_url = URL_MAPPING.get(q_text, "#")
+            if raw_url != "#":
+                fiche_url = f"/?redirect_url={urllib.parse.quote(raw_url)}"
+            else:
+                fiche_url = "#"
+            st.error(f"**Score critique ({q_avg:.2f})** : {q_text}\n\n👉 **Fiche pratique recommandée** : [Consulter]({fiche_url})")
         
         q_idx += 1
 
