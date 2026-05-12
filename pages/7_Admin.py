@@ -21,12 +21,49 @@ from utils.auth import require_role, get_current_user, hash_password
 from db.database import get_session, DB_PATH
 from db.models import Firm, User, SurveyResponse, OFSMacroData, MonthlyUpload
 
-require_role("admin", "hr_manager")
+require_role("admin", "hr_manager", "employee")
 user = get_current_user()
 is_admin = user["role"] == "admin"
+is_employee = user["role"] == "employee"
 
 st.title("⚙️ Administration HR Valais" if is_admin else f"⚙️ Administration - {user.get('firm_name', 'Firme')}")
 st.caption(f"Vue globale agrégée — {datetime.now().strftime('%d %B %Y %H:%M')}" if is_admin else f"Vue entreprise — {datetime.now().strftime('%d %B %Y %H:%M')}")
+
+if is_employee:
+    st.subheader("🔐 Changer mon mot de passe")
+    with st.form("change_my_password"):
+        new_pass = st.text_input("Nouveau mot de passe", type="password")
+        confirm_pass = st.text_input("Confirmer le mot de passe", type="password")
+        if st.form_submit_button("Mettre à jour"):
+            if new_pass and new_pass == confirm_pass:
+                with get_session() as session:
+                    u_db = session.query(User).get(user["user_id"])
+                    u_db.hashed_password = hash_password(new_pass)
+                st.success("Mot de passe mis à jour avec succès !")
+            else:
+                st.error("Les mots de passe ne correspondent pas ou sont vides.")
+    st.stop()
+
+# ---------------------------------------------------------------------------
+# Data Loaders
+# ---------------------------------------------------------------------------
+@st.cache_data(ttl=30)
+def _load_users(firm_id=None) -> pd.DataFrame:
+    with get_session() as session:
+        if firm_id:
+            users_db = session.query(User).filter_by(firm_id=firm_id).all()
+        else:
+            users_db = session.query(User).all()
+        firms_db = {f.firm_id: f.name for f in session.query(Firm).all()}
+        return pd.DataFrame([{
+            "user_id": u.user_id,
+            "Utilisateur": u.username,
+            "Nom": u.display_name,
+            "Rôle": u.role,
+            "Entreprise": firms_db.get(u.firm_id, "—"),
+            "Limite/An": getattr(u, 'max_surveys_per_year', 1),
+            "Nouveau mot de passe": ""
+        } for u in users_db])
 
 # ---------------------------------------------------------------------------
 # Firm & User Management
@@ -60,7 +97,7 @@ with st.expander("👤 Créer un Utilisateur"):
     with st.form("create_user_form"):
         new_username = st.text_input("Nom d'utilisateur")
         new_display = st.text_input("Nom affiché")
-        new_password = st.text_input("Mot de passe", type="password")
+        # Le mot de passe par défaut sera 'ChangeMe'
         
         if is_admin:
             with get_session() as session:
@@ -74,7 +111,7 @@ with st.expander("👤 Créer un Utilisateur"):
             st.text_input("Rôle", value="Employee", disabled=True)
             
         submitted_user = st.form_submit_button("Créer l'utilisateur")
-        if submitted_user and new_username and new_password:
+        if submitted_user and new_username:
             with get_session() as session:
                 target_firm_id = None
                 if is_admin:
@@ -85,9 +122,9 @@ with st.expander("👤 Créer un Utilisateur"):
                     
                 session.add(User(
                     user_id=str(uuid.uuid4()), firm_id=target_firm_id, username=new_username,
-                    role=new_role, hashed_password=hash_password(new_password), display_name=new_display
+                    role=new_role, hashed_password=hash_password("ChangeMe"), display_name=new_display
                 ))
-            st.success("Utilisateur créé avec succès.")
+            st.success("Utilisateur créé avec succès. Le mot de passe par défaut est 'ChangeMe'.")
             st.rerun()
 
 with st.expander("🔢 Modifier les limites de sondages"):
@@ -117,28 +154,52 @@ with st.expander("🔢 Modifier les limites de sondages"):
 st.divider()
 
 # ---------------------------------------------------------------------------
-# Users list (No passwords shown)
+# Users list
 # ---------------------------------------------------------------------------
 st.subheader("👤 Utilisateurs enregistrés")
 
-@st.cache_data(ttl=30)
-def _load_users(firm_id=None) -> pd.DataFrame:
-    with get_session() as session:
-        if firm_id:
-            users_db = session.query(User).filter_by(firm_id=firm_id).all()
-        else:
-            users_db = session.query(User).all()
-        firms_db = {f.firm_id: f.name for f in session.query(Firm).all()}
-        return pd.DataFrame([{
-            "Utilisateur": u.username,
-            "Nom": u.display_name,
-            "Rôle": u.role,
-            "Entreprise": firms_db.get(u.firm_id, "—"),
-            "Limite/An": getattr(u, 'max_surveys_per_year', 1)
-        } for u in users_db])
 
 users_df = _load_users(None if is_admin else user["firm_id"])
-st.dataframe(users_df, use_container_width=True)
+
+with st.form("edit_users_form"):
+    st.write("Modifiez le nom d'utilisateur ou tapez un nouveau mot de passe ci-dessous :")
+    edited_df = st.data_editor(
+        users_df,
+        column_config={
+            "user_id": None,
+            "Nouveau mot de passe": st.column_config.TextColumn("Nouveau mot de passe (laisser vide sinon)")
+        },
+        disabled=["Nom", "Rôle", "Entreprise", "Limite/An"],
+        use_container_width=True,
+        hide_index=True
+    )
+    
+    if st.form_submit_button("Sauvegarder les modifications"):
+        changes_made = False
+        with get_session() as session:
+            for i, row in edited_df.iterrows():
+                uid = row["user_id"]
+                new_username = row["Utilisateur"]
+                new_pw = row["Nouveau mot de passe"]
+                
+                orig_row = users_df.iloc[i]
+                orig_username = orig_row["Utilisateur"]
+                
+                if new_username != orig_username or new_pw.strip() != "":
+                    u_db = session.query(User).get(uid)
+                    if new_username != orig_username:
+                        u_db.username = new_username
+                        changes_made = True
+                    if new_pw.strip() != "":
+                        u_db.hashed_password = hash_password(new_pw.strip())
+                        changes_made = True
+        
+        if changes_made:
+            _load_users.clear()
+            st.success("Modifications sauvegardées avec succès.")
+            st.rerun()
+        else:
+            st.info("Aucune modification détectée.")
 
 if is_admin:
     # ---------------------------------------------------------------------------

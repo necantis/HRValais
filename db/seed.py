@@ -156,7 +156,8 @@ def run_seed() -> None:
     from sqlalchemy import text as _text
     with get_session() as session:
         # Temporarily disable FK enforcement so bulk inserts can use pseudo user_ids
-        session.execute(_text("PRAGMA foreign_keys=OFF"))
+        if session.bind.dialect.name == 'sqlite':
+            session.execute(_text("PRAGMA foreign_keys=OFF"))
 
         _seed_firms(session)
         firm_map = {f.name: f.firm_id for f in session.query(Firm).all()}
@@ -167,13 +168,27 @@ def run_seed() -> None:
         }
 
         _seed_users(session, firm_key_to_id)
-        session.flush()
+        session.commit()
 
         _seed_ofs(session)
-        _seed_ibm_responses(session, firm_key_to_id)
-        _seed_synthetic_longitudinal(session, firm_key_to_id)
+        session.commit()
+        
+        try:
+            _seed_ibm_responses(session, firm_key_to_id)
+            session.commit()
+        except Exception as e:
+            logger.error(f"Failed to seed IBM responses: {e}")
+            session.rollback()
+            
+        try:
+            _seed_synthetic_longitudinal(session, firm_key_to_id)
+            session.commit()
+        except Exception as e:
+            logger.error(f"Failed to seed longitudinal data: {e}")
+            session.rollback()
 
-        session.execute(_text("PRAGMA foreign_keys=ON"))
+        if session.bind.dialect.name == 'sqlite':
+            session.execute(_text("PRAGMA foreign_keys=ON"))
 
     logger.info("Seed complete.")
 

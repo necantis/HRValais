@@ -43,8 +43,8 @@ SURVEY_STRUCTURE: list[tuple[str, list[str]]] = [
     ("Qualité de vie au travail (QVT)", [
         "L'entreprise identifie et informe les employés des principaux risques liés à la santé et à la sécurité.",
         "L'entreprise prend les mesures adéquates pour protéger ses collaborateurs.",
-        "L'entreprise offre, lorsque c'est possible, une certaine flexibilité : Des horaires / Du lieu de travail",
-        "Quand la flexibilité n'est pas possible, quelles actions sont mises en place ?",
+        "L'entreprise offre, lorsque c'est possible, une certaine flexibilité des horaires",
+        "L'entreprise offre, lorsque c'est possible, une certaine flexibilité du lieu de travail",
         "L'entreprise est à l'écoute de ses collaborateurs.",
         "L'entreprise met en place des actions pour fidéliser ses collaborateurs à long terme",
     ]),
@@ -107,9 +107,9 @@ URL_MAPPING: dict[str, str] = {
         "https://www.hr-valais.ch/fiches-rh-pme/5-1-sante-et-securite-au-travail/viewdocument/[ID]",
     "L'entreprise prend les mesures adéquates pour protéger ses collaborateurs.":
         "https://www.hr-valais.ch/fiches-rh-pme/5-1-sante-et-securite-au-travail/viewdocument/[ID]",
-    "L'entreprise offre, lorsque c'est possible, une certaine flexibilité : Des horaires / Du lieu de travail":
+    "L'entreprise offre, lorsque c'est possible, une certaine flexibilité des horaires":
         "https://www.hr-valais.ch/fiches-rh-pme/5-2-flexibilite-des-horaires-et-du-lieu-de-travail/viewdocument/[ID]",
-    "Quand la flexibilité n'est pas possible, quelles actions sont mises en place ?":
+    "L'entreprise offre, lorsque c'est possible, une certaine flexibilité du lieu de travail":
         "https://www.hr-valais.ch/fiches-rh-pme/5-2-flexibilite-des-horaires-et-du-lieu-de-travail/viewdocument/[ID]",
     "L'entreprise est à l'écoute de ses collaborateurs.":
         "https://www.hr-valais.ch/fiches-rh-pme/5-3-fidelisation/viewdocument/[ID]",

@@ -31,16 +31,43 @@ _SessionFactory = None
 def get_engine():
     global _engine
     if _engine is None:
-        _engine = create_engine(
-            f"sqlite:///{DB_PATH}",
-            connect_args={"check_same_thread": False},
-            echo=False,
-        )
+        import streamlit as st
+        import os
 
-        @event.listens_for(_engine, "connect")
-        def _set_wal(dbapi_con, _):
-            dbapi_con.execute("PRAGMA journal_mode=WAL")
-            dbapi_con.execute("PRAGMA foreign_keys=ON")
+        # Prioritize Streamlit secrets, then environment variables, then local SQLite
+        db_url = None
+        try:
+            db_url = st.secrets.get("DATABASE_URL")
+        except Exception:
+            pass
+
+        if not db_url:
+            db_url = os.environ.get("DATABASE_URL")
+
+        if db_url:
+            # SQLAlchemy 2.0 requires postgresql:// or postgresql+psycopg2://
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+            
+            _engine = create_engine(
+                db_url,
+                echo=False,
+                pool_pre_ping=True,  # recommended for cloud databases
+            )
+            logger.info("Connected to Cloud PostgreSQL database.")
+        else:
+            _engine = create_engine(
+                f"sqlite:///{DB_PATH}",
+                connect_args={"check_same_thread": False},
+                echo=False,
+            )
+
+            @event.listens_for(_engine, "connect")
+            def _set_wal(dbapi_con, _):
+                dbapi_con.execute("PRAGMA journal_mode=WAL")
+                dbapi_con.execute("PRAGMA foreign_keys=ON")
+            logger.info("Connected to local SQLite database.")
+            
     return _engine
 
 
