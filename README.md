@@ -28,8 +28,9 @@ This section is written specifically for future AI agents working on this reposi
 - `pages/1_Survey.py`: The employee interface. **Crucial detail**: The survey enforces explicit answers (`index=None` on radio buttons). Missing questions are stored in `st.session_state["missing_questions"]` and highlighted in red upon validation failure.
 - `pages/2_Dashboard_Internal.py`: The internal dashboard. Accessible by `hr_manager` (sees their firm + benchmark) and `admin` (sees all firms overlaid, boxplots, and violin plots). Includes an admin toggle to show/hide test data.
 - `pages/3_Dashboard_Benchmarking.py`: OFS macro-data benchmarking (gross monthly wages by position, age, gender). Accessible by `hr_manager` and `admin`.
-- `pages/4_Dashboard_MixedModels.py`: Mixed regression models predicting attrition. Accessible by `hr_manager` and `admin`. Includes an admin sidebar company selector to inspect any firm.
-- `pages/5_Dashboard_Timeseries.py`: Longitudinal time-series (Markov Chain, Bayesian PyMC, ensemble models). Accessible by `hr_manager` and `admin`. Includes an admin sidebar company selector defaulting to firms with longitudinal observations.
+- `pages/demo_app.py`: Demo App (IBM Attrition Dashboard). Positioned directly after Benchmarking OFS in the Admin navigation.
+- `pages/4_Dashboard_MixedModels.py`: Mixed regression models predicting attrition. Accessible by `hr_manager` and `admin`. Allows selecting registered firms or the full **IBM Attrition Dataset** (`utils/ibm_data.py`) for analysis.
+- `pages/5_Dashboard_Timeseries.py`: Longitudinal time-series (Markov Chain, Bayesian PyMC, ensemble models). Accessible by `hr_manager` and `admin`. Supports both firm-level longitudinal records and the **IBM Attrition Dataset** mapped to time-series cohorts.
 - `pages/6_Upload.py`: Monthly CSV ingestion. Accessible by `hr_manager` and `admin`. Allows admins to select target company for upload and history review.
 - `pages/7_Admin.py`: The global admin panel. Uses `st.tabs` for layout. Contains user management, database health, and the **Test Hypothèses** tab. Includes a global sidebar toggle to include/exclude test data across all tabs and telemetry.
 
