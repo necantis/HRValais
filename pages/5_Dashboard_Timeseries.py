@@ -20,13 +20,18 @@ import streamlit as st
 from scipy import stats
 
 from utils.auth import require_role, get_current_user
+from utils.test_data import format_firm_name
 from db.database import get_session
-from db.models import SurveyResponse, OFSMacroData
+from db.models import SurveyResponse, OFSMacroData, Firm
 
-require_role("hr_manager")
+require_role("hr_manager", "admin")
 user = get_current_user()
+is_admin = user["role"] == "admin"
 
 st.title("⏱️ Séries temporelles — Modélisation des transitions d'engagement")
+
+selected_firm_name = user.get("firm_name", "Votre entreprise")
+selected_firm_id = user.get("firm_id")
 
 STATES = ["Highly Engaged", "Content", "Passively Looking", "Resigned"]
 STATE_COLORS = {
@@ -40,6 +45,25 @@ STATE_COLORS = {
 # Sidebar controls
 # ---------------------------------------------------------------------------
 with st.sidebar:
+    if is_admin:
+        st.markdown("### 🏢 Entreprise (Admin)")
+        with get_session() as session:
+            firms = session.query(Firm).order_by(Firm.name).all()
+            firm_map = {format_firm_name(f.name): f.firm_id for f in firms}
+        if firm_map:
+            # Default to firm with longitudinal responses if available
+            default_idx = 0
+            with get_session() as session:
+                first_resp = session.query(SurveyResponse.firm_id).filter(SurveyResponse.month_index.isnot(None)).first()
+                if first_resp:
+                    for idx, (fname, fid) in enumerate(firm_map.items()):
+                        if fid == first_resp[0]:
+                            default_idx = idx
+                            break
+            selected_firm_name = st.selectbox("Sélectionner l'entreprise", list(firm_map.keys()), index=default_idx)
+            selected_firm_id = firm_map[selected_firm_name]
+            st.divider()
+
     st.markdown("### ⚙️ Paramètres du modèle")
     model_choice = st.radio(
         "Modèle actif",
@@ -103,14 +127,14 @@ def _load_ofs_turnover() -> float:
         rates = [r.turnover_rate for r in rows if r.turnover_rate]
     return float(np.mean(rates)) if rates else 0.12
 
-df = _load_longitudinal(user["firm_id"])
+df = _load_longitudinal(selected_firm_id)
 ofs_turnover = _load_ofs_turnover()
 
 if df.empty:
-    st.warning("⚠️ Aucune donnée longitudinale disponible pour cette entreprise.")
+    st.warning(f"⚠️ Aucune donnée longitudinale disponible pour {selected_firm_name}.")
     st.stop()
 
-st.info(f"📊 **{len(df)}** observations longitudinales · {df['month_index'].nunique()} mois")
+st.info(f"📊 **{len(df)}** observations longitudinales · {df['month_index'].nunique()} mois — Entreprise : **{selected_firm_name}**")
 
 # ---------------------------------------------------------------------------
 # Helper: build empirical transition matrix

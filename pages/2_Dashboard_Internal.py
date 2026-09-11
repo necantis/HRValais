@@ -17,6 +17,7 @@ import streamlit as st
 
 from utils.auth import require_role, get_current_user
 from utils.pdf_generator import SURVEY_STRUCTURE, URL_MAPPING
+from utils.test_data import format_firm_name, is_test_firm
 from db.database import get_session
 from db.models import SurveyResponse, Firm
 
@@ -70,7 +71,7 @@ def _load_all_data() -> pd.DataFrame:
         rows = session.query(SurveyResponse).with_entities(*entities).all()
         # Fetch firm names to join
         firms = session.query(Firm).all()
-        firm_map = {f.firm_id: f.name for f in firms}
+        firm_map = {f.firm_id: format_firm_name(f.name) for f in firms}
         
     if not rows:
         return pd.DataFrame()
@@ -92,12 +93,26 @@ df_all_filtered = df_all.replace(0, np.nan)
 # ADMIN DASHBOARD
 # ===========================================================================
 if is_admin:
-    st.title("📊 Tableau de bord global (Admin)")
-    st.caption("Vue comparative de toutes les entreprises")
+    col_head, col_btn = st.columns([3, 1])
+    with col_head:
+        st.title("📊 Tableau de bord global (Admin)")
+        st.caption("Vue comparative de toutes les entreprises")
+    with col_btn:
+        show_test_data = st.toggle(
+            "Afficher données de test",
+            value=True,
+            help="Inclure Alpina Services SA et Rhône Industrie Sàrl (marquées comme Données de Test)"
+        )
+
+    df_admin = df_all_filtered if show_test_data else df_all_filtered[~df_all_filtered["firm_name"].apply(is_test_firm)]
+
+    if df_admin.empty:
+        st.info("Aucune donnée disponible hors données de test. Réactivez l'option ci-dessus pour afficher les données de test.")
+        st.stop()
 
     # 1. Multi-firm Spider Graph
     fig_radar = go.Figure()
-    for firm_name, grp in df_all_filtered.groupby("firm_name"):
+    for firm_name, grp in df_admin.groupby("firm_name"):
         means = grp[PILLARS].mean().values
         fig_radar.add_trace(go.Scatterpolar(
             r=list(means) + [means[0]],
@@ -117,7 +132,7 @@ if is_admin:
     # 2. Boxplot for 33 Questions
     st.subheader("Distribution des scores par question (Boxplot)")
     st.markdown("Répartition des notes pour les 33 questions individuelles.")
-    df_q = df_all_filtered[["firm_name"] + Q_COLS].melt(id_vars=["firm_name"], var_name="Question", value_name="Score")
+    df_q = df_admin[["firm_name"] + Q_COLS].melt(id_vars=["firm_name"], var_name="Question", value_name="Score")
     # Clean question labels (e.g., 'qvt_q19' -> 'Q19')
     df_q["Question"] = df_q["Question"].apply(lambda x: x.split("_")[-1].upper())
     
@@ -137,7 +152,7 @@ if is_admin:
     # 3. Violin Plot for 7 Pillars
     st.subheader("Distribution des scores par pilier (Violin Plot)")
     st.markdown("Densité de probabilité et distribution des 7 dimensions principales.")
-    df_p = df_all_filtered[["firm_name"] + PILLARS].melt(id_vars=["firm_name"], var_name="Dimension", value_name="Score")
+    df_p = df_admin[["firm_name"] + PILLARS].melt(id_vars=["firm_name"], var_name="Dimension", value_name="Score")
     dim_map = dict(zip(PILLARS, PILLAR_LABELS))
     df_p["Dimension"] = df_p["Dimension"].map(dim_map)
     

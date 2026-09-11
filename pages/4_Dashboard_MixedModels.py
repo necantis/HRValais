@@ -17,14 +17,39 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from utils.auth import require_role, get_current_user
+from utils.test_data import format_firm_name
 from db.database import get_session
-from db.models import SurveyResponse
+from db.models import SurveyResponse, Firm
 
-require_role("hr_manager")
+require_role("hr_manager", "admin")
 user = get_current_user()
+is_admin = user["role"] == "admin"
 
 st.title("🔬 Modèles mixtes — Analyse de la rétention")
-st.caption("Régression logistique et OLS sur les données de l'entreprise")
+
+selected_firm_name = user.get("firm_name", "Votre entreprise")
+selected_firm_id = user.get("firm_id")
+
+if is_admin:
+    with st.sidebar:
+        st.markdown("### 🏢 Entreprise (Admin)")
+        with get_session() as session:
+            firms = session.query(Firm).order_by(Firm.name).all()
+            firm_map = {format_firm_name(f.name): f.firm_id for f in firms}
+        if firm_map:
+            # Default to first firm with >= 30 responses if available
+            default_idx = 0
+            with get_session() as session:
+                for idx, (fname, fid) in enumerate(firm_map.items()):
+                    cnt = session.query(SurveyResponse).filter_by(firm_id=fid).count()
+                    if cnt >= 30:
+                        default_idx = idx
+                        break
+            selected_firm_name = st.selectbox("Sélectionner l'entreprise", list(firm_map.keys()), index=default_idx)
+            selected_firm_id = firm_map[selected_firm_name]
+            st.divider()
+
+st.caption(f"Régression logistique et OLS sur les données de {selected_firm_name}")
 
 st.markdown("""
 <div class="caveat-box">
@@ -80,13 +105,13 @@ def _load_data(firm_id: str) -> pd.DataFrame:
     df["resigned_int"] = (df["engagement_state"] == "Resigned").astype(int)
     return df.dropna()
 
-df = _load_data(user["firm_id"])
+df = _load_data(selected_firm_id)
 
 if df.empty or len(df) < 30:
-    st.warning("Données insuffisantes pour l'analyse (minimum 30 réponses nécessaires).")
+    st.warning(f"Données insuffisantes pour l'analyse de {selected_firm_name} (minimum 30 réponses nécessaires).")
     st.stop()
 
-st.info(f"📊 {len(df)} réponses analysées pour {user['firm_name']}")
+st.info(f"📊 {len(df)} réponses analysées pour {selected_firm_name}")
 
 # ---------------------------------------------------------------------------
 # Logistic Regression: Predict Attrition from Pillar Scores

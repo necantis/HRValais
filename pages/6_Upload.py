@@ -16,14 +16,30 @@ import pandas as pd
 import streamlit as st
 
 from utils.auth import require_role, get_current_user
+from utils.test_data import format_firm_name
 from db.database import get_session
-from db.models import MonthlyUpload, SurveyResponse
+from db.models import MonthlyUpload, SurveyResponse, Firm
 
-require_role("hr_manager")
+require_role("hr_manager", "admin")
 user = get_current_user()
+is_admin = user["role"] == "admin"
+
+selected_firm_name = user.get("firm_name", "Votre entreprise")
+selected_firm_id = user.get("firm_id")
+
+if is_admin:
+    with st.sidebar:
+        st.markdown("### 🏢 Entreprise cible (Admin)")
+        with get_session() as session:
+            firms = session.query(Firm).order_by(Firm.name).all()
+            firm_map = {format_firm_name(f.name): f.firm_id for f in firms}
+        if firm_map:
+            selected_firm_name = st.selectbox("Sélectionner l'entreprise", list(firm_map.keys()))
+            selected_firm_id = firm_map[selected_firm_name]
+            st.divider()
 
 st.title("📤 Importer des données RH mensuelles")
-st.caption(f"Entreprise : **{user['firm_name']}**")
+st.caption(f"Entreprise : **{selected_firm_name}**")
 
 st.markdown("""
 Déposez un fichier CSV mensuel contenant les scores de piliers HR Valais.
@@ -55,7 +71,7 @@ def _load_uploads(firm_id: str) -> pd.DataFrame:
             "ID": r.upload_id[:8] + "…",
         } for r in rows])
 
-history_df = _load_uploads(user["firm_id"])
+history_df = _load_uploads(selected_firm_id)
 if not history_df.empty:
     with st.expander("📋 Historique des imports récents", expanded=False):
         st.dataframe(history_df, use_container_width=True)
@@ -99,7 +115,7 @@ if msg is not None:
                     with get_session() as session:
                         upload = MonthlyUpload(
                             upload_id=str(uuid.uuid4()),
-                            firm_id=user["firm_id"],
+                            firm_id=selected_firm_id,
                             uploaded_at=datetime.utcnow(),
                             filename=uploaded_file.name,
                             row_count=len(df),
@@ -133,7 +149,7 @@ if msg is not None:
                                 session.add(SurveyResponse(
                                     response_id=str(uuid.uuid4()),
                                     user_id=PSEUDO_HR,
-                                    firm_id=user["firm_id"],
+                                    firm_id=selected_firm_id,
                                     timestamp=datetime.utcnow(),
                                     month_index=int(row["month_index"]) if "month_index" in df.columns else None,
                                     age=int(row["age"]) if "age" in df.columns and pd.notna(row.get("age")) else None,

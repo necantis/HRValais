@@ -1,7 +1,7 @@
 """
 pages/3_Dashboard_Benchmarking.py
 Dashboard 2 — OFS macro-data benchmarking: gross monthly wages by position, age, gender.
-Access: hr_manager only.
+Access: hr_manager, admin.
 """
 
 import sys
@@ -18,7 +18,7 @@ from utils.auth import require_role, get_current_user
 from db.database import get_session
 from db.models import OFSMacroData, SurveyResponse
 
-require_role("hr_manager")
+require_role("hr_manager", "admin")
 user = get_current_user()
 
 st.title("📈 Benchmarking OFS — Salaires et mobilité")

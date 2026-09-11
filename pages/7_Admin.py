@@ -18,6 +18,7 @@ import uuid
 from datetime import datetime
 
 from utils.auth import require_role, get_current_user, hash_password
+from utils.test_data import format_firm_name, is_test_firm
 from db.database import get_session, DB_PATH
 from db.models import Firm, User, SurveyResponse, OFSMacroData, MonthlyUpload, ActivityLog
 
@@ -25,6 +26,14 @@ require_role("admin", "hr_manager", "employee")
 user = get_current_user()
 is_admin = user["role"] == "admin"
 is_employee = user["role"] == "employee"
+
+show_test_data = True
+if is_admin:
+    show_test_data = st.sidebar.toggle(
+        "Afficher données de test",
+        value=True,
+        help="Inclure ou masquer Alpina Services SA et Rhône Industrie Sàrl (données de test)"
+    )
 
 st.title("⚙️ Administration HR Valais" if is_admin else f"⚙️ Administration - {user.get('firm_name', 'Firme')}")
 st.caption(f"Vue globale agrégée — {datetime.now().strftime('%d %B %Y %H:%M')}" if is_admin else f"Vue entreprise — {datetime.now().strftime('%d %B %Y %H:%M')}")
@@ -54,7 +63,7 @@ def _load_users(firm_id=None) -> pd.DataFrame:
             users_db = session.query(User).filter_by(firm_id=firm_id).all()
         else:
             users_db = session.query(User).all()
-        firms_db = {f.firm_id: f.name for f in session.query(Firm).all()}
+        firms_db = {f.firm_id: format_firm_name(f.name) for f in session.query(Firm).all()}
         return pd.DataFrame([{
             "user_id": u.user_id,
             "Utilisateur": u.username,
@@ -163,11 +172,17 @@ with tab1:
 
     st.subheader("👤 Utilisateurs enregistrés")
     users_df = _load_users(None if is_admin else user["firm_id"])
+    if is_admin and not show_test_data and not users_df.empty:
+        users_df = users_df[~users_df["Entreprise"].apply(is_test_firm)].reset_index(drop=True)
 
     with get_session() as session:
-        firm_map_inv = {f.name: f.firm_id for f in session.query(Firm).all()}
+        all_firms = session.query(Firm).all()
+        firm_map_inv = {format_firm_name(f.name): f.firm_id for f in all_firms}
+        firm_map_inv.update({f.name: f.firm_id for f in all_firms})
         firm_map_inv["—"] = None
-        firm_names = list(f.name for f in session.query(Firm).all())
+        firm_names = [format_firm_name(f.name) for f in all_firms]
+        if not show_test_data:
+            firm_names = [fn for fn in firm_names if not is_test_firm(fn)]
 
     disabled_cols = [] if is_admin else ["Rôle", "Entreprise"]
 
@@ -267,11 +282,13 @@ if is_admin:
                    "remuneration_avg", "qvt_avg", "droit_avg", "transverse_avg"]
         
         @st.cache_data(ttl=60)
-        def _load_cross_firm() -> pd.DataFrame:
+        def _load_cross_firm(include_test_data: bool = True) -> pd.DataFrame:
             with get_session() as session:
                 firms_q = session.query(Firm).all()
                 rows = []
                 for firm in firms_q:
+                    if not include_test_data and is_test_firm(firm.name):
+                        continue
                     responses = (
                         session.query(SurveyResponse)
                         .filter_by(firm_id=firm.firm_id)
@@ -293,9 +310,9 @@ if is_admin:
                     avg_score = df_firm[PILLARS].mean().mean()
                     n = len(df_firm)
         
-                    firm_hash = hashlib.sha256(firm.firm_id.encode()).hexdigest()[:6].upper()
                     rows.append({
-                        "Entreprise (hash)": f"FIRM-{firm_hash}",
+                        "Entreprise": format_firm_name(firm.name),
+                        "Type": "Données de test" if is_test_firm(firm.name) else "Entreprise réelle",
                         "N réponses": n,
                         "Score global moyen": round(avg_score, 2),
                         "Taux attrition": f"{attrition_rate:.1%}" if pd.notna(attrition_rate) else "N/A",
@@ -305,21 +322,23 @@ if is_admin:
                     })
             return pd.DataFrame(rows)
         
-        cross_firm_df = _load_cross_firm()
+        cross_firm_df = _load_cross_firm(show_test_data)
         if not cross_firm_df.empty:
             st.dataframe(cross_firm_df, use_container_width=True)
         else:
             st.info("Aucune donnée inter-entreprise disponible.")
         
         st.divider()
-        st.subheader("📊 Comparaison inter-Firmes — Scores par pilier (anonymisés)")
+        st.subheader("📊 Comparaison inter-Firmes — Scores par pilier")
         
         @st.cache_data(ttl=60)
-        def _pillar_comparison() -> pd.DataFrame:
+        def _pillar_comparison(include_test_data: bool = True) -> pd.DataFrame:
             with get_session() as session:
                 firms_db = session.query(Firm).all()
                 rows = []
                 for firm in firms_db:
+                    if not include_test_data and is_test_firm(firm.name):
+                        continue
                     resp = (
                         session.query(SurveyResponse)
                         .filter_by(firm_id=firm.firm_id)
@@ -330,12 +349,11 @@ if is_admin:
                         continue
                     df_f = pd.DataFrame(resp, columns=PILLARS)
                     means = df_f.mean().to_dict()
-                    firm_hash = hashlib.sha256(firm.firm_id.encode()).hexdigest()[:6].upper()
-                    means["Entreprise"] = f"FIRM-{firm_hash}"
+                    means["Entreprise"] = format_firm_name(firm.name)
                     rows.append(means)
             return pd.DataFrame(rows)
         
-        pillar_df = _pillar_comparison()
+        pillar_df = _pillar_comparison(show_test_data)
         PILLAR_LABELS = ["Recrutement", "Compétences", "Performance",
                          "Rémunération", "QVT", "Droit", "Transverse"]
         
@@ -395,11 +413,11 @@ if is_admin:
         )
 
         @st.cache_data(ttl=60)
-        def _load_telemetry() -> pd.DataFrame:
+        def _load_telemetry(include_test_data: bool = True) -> pd.DataFrame:
             with get_session() as session:
                 logs = session.query(ActivityLog).all()
                 firms = session.query(Firm).all()
-                firm_map = {f.firm_id: f.name for f in firms}
+                firm_map = {f.firm_id: format_firm_name(f.name) for f in firms}
                 
                 # We need firm scores as well
                 from db.models import SurveyResponse
@@ -426,6 +444,10 @@ if is_admin:
                 } for l in logs])
 
                 for firm_id, group in df_logs.groupby("firm_id"):
+                    firm_name = firm_map.get(firm_id, "Inconnue")
+                    if not include_test_data and is_test_firm(firm_name):
+                        continue
+
                     # 1. Avg Survey Time
                     survey_logs = group[group["action_type"] == "survey_completion_time"]
                     avg_survey_time = survey_logs["action_value"].astype(float).mean() if not survey_logs.empty else 0
@@ -440,7 +462,6 @@ if is_admin:
                     total_clicks = len(click_logs)
 
                     score = firm_scores.get(firm_id, np.nan)
-                    firm_name = firm_map.get(firm_id, "Inconnue")
                     
                     # Feature Engineering: Dashboard Intensity
                     # (Clicks per visit - simple proxy since time-on-page requires JS)
@@ -457,7 +478,7 @@ if is_admin:
                 
                 return pd.DataFrame(data)
 
-        df_telemetry = _load_telemetry()
+        df_telemetry = _load_telemetry(show_test_data)
 
         if df_telemetry.empty:
             st.info("Aucune donnée de télémétrie enregistrée pour le moment. Naviguez sur les dashboards et remplissez des sondages pour générer des données.")
